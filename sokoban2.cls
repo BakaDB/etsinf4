@@ -20,78 +20,118 @@
 )
 			
 (deftemplate agrietamiento 0 100 %
-	(ligero (0 1) (10 1) (20 0))
+	((ligero (0 1) (10 1) (20 0))
 	(medio (5 0) (25 1) (45 1) (55 0))
 	(fuerte (50 0) (60 1) (100 1))
-)
+))
 
 (deftemplate temperatura -10 90 C
-	(fria (0 1) (10 1) (20 0))
+	((fria (0 1) (10 1) (20 0))
 	(moderada (5 0) (25 1) (45 1) (55 0))
-	(calida (50 0) (60 1) (100 1))
-)
+	(calida (50 0) (60 1) (90 1))
+))
 
 (deftemplate necesidad 0 100 m
-	(baja (z 10 25))
+	((baja (z 10 25))
 	(media (pi 15 60))
 	(urgente (s 55 90))
-)
+))
 
-(deftemplate carretera 
+(deftemplate carretera
+	(slot id (type SYMBOL)) 
 	(slot agrietamiento (type INTEGER))
-	(slot tempMax (type INTEGER))
-	(slot tempMin (type INTEGER))
+	(slot tempMax (type FLOAT))
+	(slot tempMin (type FLOAT))
 	(slot prioridad (type FLOAT))
 )
 
-(deffunction proceso ()
-	(reset)
-	
-	;leer valores difusos
-	(printout t "Introduzca el nivel de agrietamiento del asfalto: ligero, medio, fuerte" crlf)
-	(bind ?Redad (read))
-	(assert-string (format nil "(agrietamiento %s)" ?Redad))
-	
-	;leer valores crisp y fusificar
-	(printout t "Introduzca temperatura mínima en grados" crlf) ;leemos un valor crisp y se fusifica (y aserta)
-	(bind ?Redad (read))
-	(fuzzify tempMin ?Redad 0.1)
-	
-	(printout t "Introduzca temperatura máxima en grados" crlf) ;leemos un valor crisp y se fusifica (y aserta)
-	(bind ?Redad (read))
-	(fuzzify tempMax ?Redad 0.1)
-	(run)
-	
-	
-	
-	?f<-(carretera (nivel ) (tempMax ) (tempMin )))
-	(test (?necesidad))
-		=>
-	(fuzzify carretera)
-	;necesidad
-	
-	
+(defrule fria_ligero
+	(temperatura fria)
+	(agrietamiento ligero)
+	=>
+	(assert (necesidad media))
 )
 
-;necesidad-reasfaltado
-;	very 				baja ligero-moderada
-;	baja				medio-moderado
-;	somewhat media		fuerte-moderado
-;	media				ligero-fria ligero-calida
-;	urgente				medio-fria
-;	very urgente		medio-calida
-;	extremely urgente	fuerte-fria fuerte-calida
+(defrule fria_medio
+	(temperatura fria)
+	(agrietamiento medio)
+	=>
+	(assert (necesidad urgente))
+)
+
+(defrule fria_fuerte
+	(temperatura fria)
+	(agrietamiento fuerte)
+	=>
+	(assert (necesidad extremely urgente))
+)
+
+(defrule moderado_ligero
+	(temperatura moderada)
+	(agrietamiento ligero)
+	=>
+	(assert (necesidad very baja))
+)
+
+(defrule moderado_medio
+	(temperatura moderada)
+	(agrietamiento medio)
+	=>
+	(assert (necesidad baja))
+)
+
+(defrule moderado_fuerte
+	(temperatura moderada)
+	(agrietamiento fuerte)
+	=>
+	(assert (necesidad somewhat baja))
+)
+
+(defrule calida_ligero
+	(temperatura calida)
+	(agrietamiento ligero)
+	=>
+	(assert (necesidad media))
+)
+
+(defrule calida_medio
+	(temperatura calida)
+	(agrietamiento medio)
+	=>
+	(assert (necesidad very urgente))
+)
+
+(defrule calida_fuerte
+	(temperatura calida)
+	(agrietamiento fuerte)
+	=>
+	(assert (necesidad extremely urgente))
+)
 
 
+(deffunction main()
+	(reset)
+ 	(printout t "Introduce identificador de la carretera:" crlf)
+	(bind ?id (read))
+ 	(printout t "Introduzca el nivel de agrietamiento del asfalto: ligero, medio, fuerte" crlf)
+	(bind ?agrietamiento (read))
+	(printout t "Introduzca temperatura mínima en grados" crlf)
+	(bind ?temp_min (read))	
+	(printout t "Introduzca temperatura máxima en grados" crlf)
+	(bind ?temp_max (read))
+	(fuzzify temperatura ?temp_min 0.1)
+	(fuzzify temperatura ?temp_max 0.1)
+	(assert (carretera (id ?id) (agrietamiento ?agrietamiento) (tempMin ?temp_min) (tempMax ?temp_max) (prioridad 0.0)))
+	(run)
+)
 
-
-
-
-
-
-
-
-
-
-
-
+(defrule defuzzy
+	(declare (salience -1))
+	?n <- (necesidad ?)
+	?c <- (carretera (id ?id) (agrietamiento ?agrietamiento) (tempMax ?temp_max) (tempMin ?temp_min) (prioridad ?p))
+ 	=> 
+	(bind ?p (moment-defuzzify ?n))
+  	(modify ?c (prioridad ?p))
+ 	(printout t "Necesidad del asfaltado: " ?p crlf)
+ 	(halt)
+)
