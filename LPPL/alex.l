@@ -1,5 +1,5 @@
 /*****************************************************************************/
-/**  Ejemplo de FLEX: S E M - 1             2019-2020 <jbenedi@dsic.upv.es> **/
+/**  Analizador Léxcio                                                      **/
 /*****************************************************************************/
 %{
 #include <stdio.h>
@@ -8,6 +8,7 @@
 
 #define  retornar(x) {if (verbosidad) ECHO;}
 %}
+
 /*-----------------------------------------------------------------------------
   Estas opciones evitan "warnings" innecesarios y permiten obtener el
   numero de linea actual en la variable global "yylineno".
@@ -20,8 +21,8 @@ delimitador		[ \t\n]+
 digito			[0-9]
 letra           [A-Za-z]
 entero			{digito}+
-constante       {entero}|{entero}+("."){entero}*|{entero}*("."){entero}+
-identificador   {letra}{{letra}|("_")}*
+constante       {entero}|{entero}\.|{entero}\.{entero}|\.{entero}
+identificador   {letra}({letra}|{digito}|\_)*
 comentario      \/\/.*\n
 
 %%
