@@ -1,5 +1,5 @@
 /*****************************************************************************/
-/**  Ejemplo de BISON-I: S E M - 2          2019-2020 <jbenedi@dsic.upv.es> **/
+/**  Analizador Sintáctivo                                                  **/
 /*****************************************************************************/
 %{
 #include <stdio.h>
@@ -7,13 +7,17 @@
 #include "header.h"
 %}
 
+%token STRUCT_ INT_ BOOL_ TRUE_ FALSE_
+%token READ_ PRINT_ IF_ ELSE_ WHILE_
+
 %token MAS_ MENOS_ POR_ DIV_ MOD_ INC_ DEC_
 %token ASIG_ MASASIG_ MENOSASIG_ PORASIG_ DIVASIG_
+
 %token IGUAL_ DESIGUAL_ MAYOR_ MENOR_ MAYORIGUAL_ MENORIGUAL_
 %token AND_ OR_ NEG_
-%token OB_ CB_ OSB_ CSB_ OCB_ CCB_ PC_
-%token INT_ BOOL_ TRUE_ FALSE_
-%token READ_ PRINT_ IF_ ELSE_ WHILE_
+
+%token OB_ CB_ OSB_ CSB_ OCB_ CCB_ SC_
+
 %token ID_
 %token CTE_ 
 
@@ -26,16 +30,16 @@ secuenciaSentencias         : sentencia
 sentencia                   : declaracion
                             | instruccion
                             ;
-declaracion                 : tipoSimple ID_ PC_
-                            | tipoSimple ID_ IGUAL_ PC_
-                            | tipoSimple ID_  OSB_ CTE_ CSB_ PC_
-                            | STRUCT_ OCB_ listaCampos CCB_ ID_ PC_
+declaracion                 : tipoSimple ID_ SC_
+                            | tipoSimple ID_ IGUAL_ constante SC_
+                            | tipoSimple ID_ OSB_ CTE_ CSB_ SC_
+                            | STRUCT_ OCB_ listaCampos CCB_ ID_ SC_
                             ;
 tipoSimple                  : INT_
                             | BOOL_
                             ;
-listaCampos                 : tipoSimple ID_
-                            | listaCampos tipoSimple ID_ PC_
+listaCampos                 : tipoSimple ID_ SC_
+                            | listaCampos tipoSimple ID_ SC_
                             ;
 instruccion                 : OCB_ CCB_
                             | OCB_ listaInstrucciones CCB_
@@ -47,19 +51,19 @@ instruccion                 : OCB_ CCB_
 listaInstrucciones          : instruccion
                             | listaInstrucciones instruccion
                             ;
-instruccionEntradaSalida    : READ_ OB_ ID_ CB_ PC_
-                            | PRINT_ OB_ expresion CB_ PC_
+instruccionEntradaSalida    : READ_ OB_ ID_ CB_ SC_
+                            | PRINT_ OB_ expresion CB_ SC_
                             ;
 instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccion
                             ;
 instruccionIteracion        : WHILE_ OB_ expresion CB_ instruccion
                             ;
-instruccionExpresion        : expresion PC_
-                            | PC_
+instruccionExpresion        : expresion SC_
+                            | SC_
                             ;
 expresion                   : expresionLogica
                             | ID_ operadorAsignacion expresion
-                            | ID_ OSB_ expresion CSB_ operador operadorAsignacion
+                            | ID_ OSB_ expresion CSB_ operadorAsignacion operador
                             | ID_ "." ID_ operadorAsignacion expresion
                             ;
 expresionLogica             : expresionIgualdad
