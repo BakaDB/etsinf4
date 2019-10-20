@@ -7,6 +7,12 @@
 #include "header.h"
 %}
 
+%union {
+    char* t_id;
+    int t_entero;
+    EXP t_exp;
+}
+
 %token STRUCT_ INT_ BOOL_ TRUE_ FALSE_
 %token READ_ PRINT_ IF_ ELSE_ WHILE_
 
@@ -18,8 +24,17 @@
 
 %token OB_ CB_ OSB_ CSB_ OCB_ CCB_ SC_
 
-%token ID_
-%token CTE_ 
+%token <t_id> ID_
+%token <t_entero> CTE_ 
+%token <t_entero> INT_ BOOL_
+
+%type <t_entero> tipoSimple
+%type <t_entero> operadorAsignacion operadorLogico operadorIgualdad operadorRelacional
+%type <t_entero> operadorAditivo operadorMultiplicativo operadorUnario operadorIncremento
+
+%type <t_exp> expresion expresionLogica expresionIgualdad expresionRelacional
+%type <t_exp> expresionAditiva expresionMultiplicativa expresionUnaria expresionSufija
+
 
 %%
 programa                    : OCB_ secuenciaSentencias CCB_
@@ -92,7 +107,7 @@ expresionSufija             : OB_ expresion CB_
                             | ID_ "." ID_
                             | constante
                             ;
-constante                   : CTE_
+constante                   : CTE_ 
                             | TRUE_
                             | FALSE_
                             ;
