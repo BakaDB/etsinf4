@@ -7,10 +7,13 @@
 #include "header.h"
 %}
 
+
 %union {
     char* t_id;
     int t_entero;
+    double t_real; ?
     EXP t_exp;
+    struct t_struct ?
 }
 
 %token STRUCT_ INT_ BOOL_ TRUE_ FALSE_

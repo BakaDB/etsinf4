@@ -10,24 +10,29 @@
 %}
 
 /*-----------------------------------------------------------------------------
-  Estas opciones evitan "warnings" innecesarios y permiten obtener el
-  numero de linea actual en la variable global "yylineno".
+    Dado que las funciones "input()" y "unput(c)" son costosas y no 
+    lasutilizaremos, evitaremos que se generen automaticamente sus rutinas
+    correspondientes desactivandolas mediante las siguientes opciones:
 -----------------------------------------------------------------------------*/
 %option noinput       
-%option nounput       
+%option nounput
+
+/*-----------------------------------------------------------------------------
+    Para mantener el numero de linea actual en la variable global yylineno
+-----------------------------------------------------------------------------*/
 %option yylineno  
 
-delimitador		[ \t\n]+
+delimitador     [ \t\n]+
 comentario      \/\/.*\n
 letra           [A-Za-z]
-digito			[0-9]
-entero			{digito}+
+digito          [0-9]
+entero          {digito}+
 constante       {entero}|{entero}\.|{entero}\.{entero}|\.{entero}
 identificador   {letra}({letra}|{digito}|\_)*
 
 
 %%
-{delimitador}	{ if (verbosidad) ECHO; }
+{delimitador}   { if (verbosidad) ECHO; }
 {comentario}    { retornar (COMENTARIO_); }
 
 "struct"        { retornar (STRUCT_); }
@@ -70,8 +75,7 @@ identificador   {letra}({letra}|{digito}|\_)*
 "}"             { retornar (CCB_); }
 ";"             { retornar (SC_)}
 
-{identificador} { retornar (ID_); }
-{constante}     { retornar (CTE_); }
+{identificador} { yylval.ident = strdup(yytext); retornar (ID_); }
+{constante}     { yylval.cent = atoi(yytext); retornar(CTE_); }
 .               { yyerror("Caracter desconocido"); }
-
 %%
