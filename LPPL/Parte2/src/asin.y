@@ -7,7 +7,6 @@
 #include "header.h"
 %}
 
-
 %union {
     char* t_id;
     int t_entero;
@@ -16,7 +15,6 @@
     struct t_struct ?
 }
 
-%token STRUCT_ INT_ BOOL_ TRUE_ FALSE_
 %token READ_ PRINT_ IF_ ELSE_ WHILE_
 
 %token MAS_ MENOS_ POR_ DIV_ MOD_ INC_ DEC_
@@ -25,11 +23,11 @@
 %token IGUAL_ DESIGUAL_ MAYOR_ MENOR_ MAYORIGUAL_ MENORIGUAL_
 %token AND_ OR_ NEG_
 
-%token OB_ CB_ OSB_ CSB_ OCB_ CCB_ SC_
+%token OB_ CB_ OSB_ CSB_ OCB_ CCB_ DOT_ SC_
 
-%token <t_id> ID_
-%token <t_entero> CTE_ 
-%token <t_entero> INT_ BOOL_
+%token STRUCT_ INT_ BOOL_ TRUE_ FALSE_
+%token ID_
+%token CTE_ 
 
 %type <t_entero> tipoSimple
 %type <t_entero> operadorAsignacion operadorLogico operadorIgualdad operadorRelacional
@@ -49,7 +47,7 @@ sentencia                   : declaracion
                             | instruccion
                             ;
 declaracion                 : tipoSimple ID_ SC_
-                            | tipoSimple ID_ IGUAL_ constante SC_
+                            | tipoSimple ID_ ASIG_ constante SC_
                             | tipoSimple ID_ OSB_ CTE_ CSB_ SC_
                             | STRUCT_ OCB_ listaCampos CCB_ ID_ SC_
                             ;
@@ -82,7 +80,7 @@ instruccionExpresion        : expresion SC_
 expresion                   : expresionLogica
                             | ID_ operadorAsignacion expresion
                             | ID_ OSB_ expresion CSB_ operadorAsignacion expresion
-                            | ID_ "." ID_ operadorAsignacion expresion
+                            | ID_ DOT_ ID_ operadorAsignacion expresion
                             ;
 expresionLogica             : expresionIgualdad
                             | expresionLogica operadorLogico expresionIgualdad
@@ -107,7 +105,7 @@ expresionSufija             : OB_ expresion CB_
                             | ID_ operadorIncremento
                             | ID_ OSB_ expresion CSB_
                             | ID_
-                            | ID_ "." ID_
+                            | ID_ DOT_ ID_
                             | constante
                             ;
 constante                   : CTE_ 

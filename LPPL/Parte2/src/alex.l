@@ -4,9 +4,10 @@
 %{
 #include <stdio.h>
 #include <string.h>
-#include "include/header.h"
+#include "header.h"
+#include "asin.h"
 
-#define  retornar(x) {if (verbosidad) ECHO;}
+#define  retornar(x) {if (verbosidad) ECHO; return(x);}
 %}
 
 /*-----------------------------------------------------------------------------
@@ -33,7 +34,7 @@ identificador   {letra}({letra}|{digito}|\_)*
 
 %%
 {delimitador}   { if (verbosidad) ECHO; }
-{comentario}    { retornar (COMENTARIO_); }
+{comentario}    { if (verbosidad) ECHO; }
 
 "struct"        { retornar (STRUCT_); }
 "int"           { retornar (INT_); }
@@ -73,6 +74,7 @@ identificador   {letra}({letra}|{digito}|\_)*
 "]"             { retornar (CSB_); }
 "{"             { retornar (OCB_); }
 "}"             { retornar (CCB_); }
+"."             { retornar (DOT_); }
 ";"             { retornar (SC_)}
 
 {identificador} { yylval.ident = strdup(yytext); retornar (ID_); }
