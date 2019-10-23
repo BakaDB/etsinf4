@@ -8,9 +8,8 @@
 %}
 
 %union {
-    char* t_id;
-    int t_entero;
-    double t_real; ?
+    char* ident;
+    int cent;
     EXP t_exp;
     struct t_struct ?
 }
