@@ -20,7 +20,6 @@
                 (needs-compactado ?t - tramo)
                 (needs-pavimentado ?t - tramo)
                 (needs-aplastado ?t - tramo)
-                (needs-señalizado ?t - tramo)
                 (needs-pintado ?t - tramo)
                 (needs-vallado ?t - tramo)
                 (needs-señalizado ?t - tramo)
@@ -49,12 +48,12 @@
     :parameters (?m - maquinaria ?t1 ?t2 - tramo)
     :duration   (= ?duration (duracion-mover-maquinaria ?t1 ?t2))
     :condition  (and 
-                    (at ?m ?t1) 
-                    (connected ?t1 ?t2) 
+                    (at ?m ?t1)
+                    (connected ?t1 ?t2)
                     (over all (available ?m))
                     (over all (available ?t1))
                     (over all (available ?t2)))
-    :effect     (and 
+    :effect     (and
                     (at start (not (at ?m ?t1)))
                     (at end (at ?m ?t2)))
 )
@@ -81,7 +80,7 @@
                 (over all (available ?c)))
     :effect     (and
                     (at start (not (needs-compactado ?t)))
-                    (at end (needs-compactado ?t))
+                    (at end (needs-pavimentado ?t))
                     (at end (increase (coste-total) (coste-compactado))))
 )
 
