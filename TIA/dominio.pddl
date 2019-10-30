@@ -26,8 +26,8 @@
                 (connected ?t1 ?t2 - tramo)
 )
 
-(:functions     (duracion-mover-maquinaria ?t1 - tramo ?t2 - tramo)
-                (duracion-mover-cuadrilla ?t1 - tramo ?t2 - tramo)
+(:functions     (duracion-mover-maquinaria ?t1 ?t2 - tramo)
+                (duracion-mover-cuadrilla ?t1 ?t2 - tramo)
 
                 (duracion-compactado)
                 (duracion-pavimentado)
@@ -161,3 +161,9 @@
 )
 
 )
+
+; Para ejecutar 
+; lpg-td-1.0 –o dominio.pddl –f problema.pddl –n 3
+; Hay que remplazar el lpg-td-1.0 por el nombre del archivo ejecutable 
+; que creamos en el primer lab con el señor.
+; El que nos echó la bronca por poner -m en vez de -n
