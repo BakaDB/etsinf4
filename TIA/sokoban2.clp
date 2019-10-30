@@ -102,7 +102,7 @@
 	(temperatura moderada)
 	(agrietamiento fuerte)
 	=>
-	(assert (necesidad somewhat baja))
+	(assert (necesidad somewhat media))
 )
 
 (defrule calida_ligero
@@ -179,7 +179,7 @@
 (defrule defuzzy	
 	(declare (salience -1))
 	(necesidad ?n)
-	?c <- (carretera (id ?id) (nivelAgrietamiento ?nivel_agrietamiento) (tempMax ?temp_max) (tempMin ?temp_min) (vehiculosPorHora ?vph) (prioridad ?))
+	?c <- (carretera (id ?id) (nivelAgrietamiento ?nivel_agrietamiento) (tempMax ?temp_max) (tempMin ?temp_min) (vehiculosPorHora ?vph) (prioridad ?p))
  	=>
 	(bind ?p (moment-defuzzify ?n))
   	(modify ?c (prioridad ?p))

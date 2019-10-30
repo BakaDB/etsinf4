@@ -27,8 +27,7 @@
                 (completed-senalizado ?t - tramo)
 )
 
-(:functions     (duracion-mover-maquinaria ?t1 ?t2 - tramo)
-                (duracion-mover-cuadrilla ?t1 ?t2 - tramo)
+(:functions     (distancia ?t1 ?t2 - tramo)
 
                 (duracion-compactado)
                 (duracion-pavimentado)
@@ -47,42 +46,34 @@
 
 (:durative-action mover-maquinaria
     :parameters (?m - maquinaria ?t1 ?t2 - tramo)
-    :duration   (= ?duration (duracion-mover-maquinaria ?t1 ?t2))
+    :duration   (= ?duration (* (distancia ?t1 ?t2) 2))
     :condition  (and 
+					(over all (connected ?t1 ?t2))
                     (at start (at ?m ?t1))
                     (at start (available ?m))
-                    (at start (available ?t1))      ; at start
-                    (at start (available ?t2))      ; at end
-                    (over all (connected ?t1 ?t2)))
+                    (over all (available ?t1))
+                    (over all (available ?t2)))
     :effect     (and
                     (at start (not (at ?m ?t1)))
                     (at start (not (available ?m)))
-                    (at start (not (available ?t1)))
-                    (at start (not (available ?t2)))
                     (at end (at ?m ?t2))
-                    (at end (available ?m))
-                    (at end (available ?t1))
-                    (at end (available ?t2)))
+                    (at end (available ?m)))
 )
 
 (:durative-action mover-cuadrilla
     :parameters (?c - cuadrilla ?t1 ?t2 - tramo)
-    :duration   (= ?duration (duracion-mover-cuadrilla ?t1 ?t2))
+    :duration   (= ?duration (distancia ?t1 ?t2))
     :condition  (and 
+					(over all (connected ?t1 ?t2))
                     (at start (at ?c ?t1))
                     (at start (available ?c))
-                    (at start (available ?t1))      ; at start
-                    (at start (available ?t2))      ; at end
-                    (over all (connected ?t1 ?t2)))
+                    (over all (available ?t1))
+                    (over all (available ?t2)))
     :effect     (and
                     (at start (not (at ?c ?t1)))
                     (at start (not (available ?c)))
-                    (at start (not (available ?t1)))
-                    (at start (not (available ?t2)))
                     (at end (at ?c ?t2))
-                    (at end (available ?c))
-                    (at end (available ?t1))
-                    (at end (available ?t2)))
+                    (at end (available ?c)))
 )
 
 (:durative-action compactado
@@ -91,10 +82,10 @@
     :condition  (and
                     (at start (needs-compactado ?t))
                     (at start (available ?t)))
-    :effect     (and
-                    (at start (not (needs-compactado ?t)))
+    :effect     (and                    
                     (at start (not (available ?t)))
                     (at end (available ?t))
+					(at end (not (needs-compactado ?t)))
                     (at end (needs-pavimentado ?t)))
 )
 
@@ -108,14 +99,14 @@
                     (at start (available ?p))
                     (over all (at ?c ?t))
                     (over all (at ?p ?t)))
-    :effect     (and
-                    (at start (not (needs-pavimentado ?t)))
+    :effect     (and                    
                     (at start (not (available ?t)))
                     (at start (not (available ?c)))
                     (at start (not (available ?p)))  
                     (at end (available ?t))  
                     (at end (available ?c))
                     (at end (available ?p))
+					(at end (not (needs-pavimentado ?t)))
                     (at end (needs-aplastado ?t))
                     (at end (increase (coste-total) (coste-cisterna)))
                     (at end (increase (coste-total) (coste-pavimentadora))))
@@ -129,12 +120,12 @@
                     (at start (available ?t))
                     (at start (available ?c))
                     (over all (at ?c ?t)))
-    :effect     (and
-                    (at start (not (needs-pavimentado ?t)))
+    :effect     (and                    
                     (at start (not (available ?t)))
                     (at start (not (available ?c)))
                     (at end (available ?t))
                     (at end (available ?c))
+					(at end (not (needs-pavimentado ?t)))
                     (at end (completed-maintenance ?t))
                     (at end (needs-pintado ?t))
                     (at end (needs-vallado ?t))
@@ -150,12 +141,12 @@
                     (at start (available ?t))
                     (at start (available ?c))
                     (over all (at ?c ?t)))
-    :effect     (and 
-                    (at start (not (needs-pintado ?t)))                    
+    :effect     (and                                         
                     (at start (not (available ?t)))
                     (at start (not (available ?c)))
                     (at end (available ?t))
                     (at end (available ?c))
+					(at end (not (needs-pintado ?t)))
                     (at end (completed-pintado ?t)))
 )
 
@@ -168,12 +159,12 @@
                     (at start (available ?t))
                     (at start (available ?c))
                     (over all (at ?c ?t)))
-    :effect     (and 
-                    (at start (not (needs-vallado ?t)))
+    :effect     (and                     
                     (at start (not (available ?t)))
                     (at start (not (available ?c)))
                     (at end (available ?t))
                     (at end (available ?c))
+					(at end (not (needs-vallado ?t)))
                     (at end (completed-vallado ?t)))
 )
 
@@ -186,12 +177,12 @@
                     (at start (available ?t))
                     (at start (available ?c))
                     (over all (at ?c ?t)))
-    :effect     (and 
-                    (at start (not (needs-senalizado ?t)))
+    :effect     (and                    
                     (at start (not (available ?t)))
                     (at start (not (available ?c)))
                     (at end (available ?t))
                     (at end (available ?c))
+					(at end (not (needs-senalizado ?t)))
                     (at end (completed-senalizado ?t)))
 )
 
