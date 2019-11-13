@@ -39,7 +39,7 @@
 type<instwhile> instruccionIteracion
 
 %%
-programa                    : OCB_ secuenciaSentencias CCB_ /*AQUI IGUAL SE METE ALGO*/
+programa                    : OCB_ secuenciaSentencias CCB_
                             ;
 secuenciaSentencias         : sentencia 
                             | secuenciaSentencias sentencia
@@ -48,21 +48,7 @@ sentencia                   : declaracion
                             | instruccion
                             ;
 declaracion                 : tipoSimple ID_ SC_
-                                {
-                                    if(!insTdS($2, $1, dvar)) {
-                                        yyerror(E_REPEATED_DECLARATION);
-                                    } else {
-                                        dvar += TALLA_TIPO_SIMPLE;
-                                    }
-                                }
                             | tipoSimple ID_ ASIG_ constante SC_
-                                {
-                                    if(!insTdS($2, $1, dvar)) {
-                                        yyerror(E_REPEATED_DECLARATION);
-                                    } else {
-                                        dvar += TALLA_TIPO_SIMPLE;
-                                    }
-                                }
                             | tipoSimple ID_ OSB_ CTE_ CSB_ SC_
                                 {
                                     int numelem = $4;
@@ -76,12 +62,8 @@ declaracion                 : tipoSimple ID_ SC_
                                     } else {
                                         dvar += numelem * TALLA_TIPO_SIMPLE;
                                     }
-                                    // comprobar tipos
                                 }
                             | STRUCT_ OCB_ listaCampos CCB_ ID_ SC_
-                                {
-
-                                }
                             ;
 tipoSimple                  : INT_
                             | BOOL_
@@ -111,6 +93,18 @@ instruccionExpresion        : expresion SC_
                             ;
 expresion                   : expresionLogica
                             | ID_ operadorAsignacion expresion
+                                {
+                                    $$.tipo = T_ERROR;
+                                    
+                                    SIMB sim = obtTdS($1);
+                                    if (sim.tipo == T_ERROR) {
+                                        yyerror(E_UNDECLARED);
+                                    } else if (!((sim.tipo == $3 == T_ENTERO) || (sim.tipo == $3 == T_LOGICO))) {
+                                        yyerror(E_TYPES_ASIGNACION);
+                                    } else {
+                                        $$.tipo = sim.tipo;
+                                    }
+                                }
                             | ID_ OSB_ expresion CSB_ operadorAsignacion expresion
                             | ID_ DOT_ ID_ operadorAsignacion expresion
                             ;
@@ -168,11 +162,11 @@ operadorMultiplicativo      : POR_
                             | DIV_
                             | MOD_
                             ;
-operadorUnario              : MAS_
-                            | MENOS_
-                            | NEG_
+operadorUnario              : MAS_      {}
+                            | MENOS_    {}
+                            | NEG_      {}
                             ;
-operadorIncremento          : INC_
-                            | DEC_
+operadorIncremento          : INC_ {}
+                            | DEC_ {}
                             ;
 %%
