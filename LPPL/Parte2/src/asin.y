@@ -11,8 +11,7 @@
   int cent;
   char *ident;
   EXP exp;
-  INS_WHILE instwhile;
-
+  //INS_WHILE instwhile;
 }
 
 %token READ_ PRINT_ IF_ ELSE_ WHILE_
@@ -66,7 +65,7 @@ declaracion                 : tipoSimple ID_ SC_
                             | tipoSimple ID_ OSB_ CTE_ CSB_ SC_
                                 {
                                     int numelem = $4;
-                                    if ($4 <= 0) {
+                                    if ($4 < 1) {
                                         yyerror(E_ARRAY_SIZE_INVALID);
                                         numelem = 0;
                                     }
@@ -80,14 +79,27 @@ declaracion                 : tipoSimple ID_ SC_
                                 }
                             | STRUCT_ OCB_ listaCampos CCB_ ID_ SC_
                                 {
-
+                                    // var listaCampos
+                                    // T.t = tregistro(LC.t)
+                                    $3.listaCampos = 
+                                    // dvar += listaCampos.talla
                                 }
                             ;
-tipoSimple                  : INT_
-                            | BOOL_
+tipoSimple                  : INT_  {$$ = T_ENTERO;}
+                            | BOOL_ {$$ = T_LOGICO;}
                             ;
 listaCampos                 : tipoSimple ID_ SC_
+                                {
+                                    int refe = insTdR($$.refe, $2, $1, dvar);
+                                    CAMP camp = obtTdR(refe, $2);
+                                    dvar += camp.desp;
+                                }
                             | listaCampos tipoSimple ID_ SC_
+                                {
+                                    int refe = insTdR($$.refe, $3, $2, dvar);
+                                    CAMP camp = obtTdR(refe, $3);
+                                    dvar += camp.desp;
+                                }
                             ;
 instruccion                 : OCB_ CCB_
                             | OCB_ listaInstrucciones CCB_
