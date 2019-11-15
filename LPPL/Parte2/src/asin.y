@@ -5,13 +5,14 @@
 #include <stdio.h>
 #include <string.h>
 #include "header.h"
+#include "libtds.h"
 %}
 
 %union {
   int cent;
   char *ident;
   EXP exp;
-  //INS_WHILE instwhile;
+  LC lc;  
 }
 
 %token READ_ PRINT_ IF_ ELSE_ WHILE_
@@ -29,16 +30,22 @@
 %token<ident> ID_
 %token<cent> CTE_
 
-%type<cent> tipoSimple operadorAditivo operadorAsignacion operadorIgualdad operadorIncremento operadorLogico operadorMultiplicativo
+%type<lc> listaCampos
+
+%type<cent> tipoSimple
+
+%type<exp> constante
+
+/*
+%type<cent> operadorAditivo operadorAsignacion operadorIgualdad operadorIncremento operadorLogico operadorMultiplicativo
 %type<cent> operadorRelacional operadorUnario instruccionSeleccion
 
 %type<exp> constante expresion expresionAditiva expresionIgualdad expresionLogica expresionMultiplicativa expresionRelacional
 %type<exp> expresionSufija expresionUnaria instruccionExpresion???????????
-
-type<instwhile> instruccionIteracion
+*/
 
 %%
-programa                    : OCB_ secuenciaSentencias CCB_ /*AQUI IGUAL SE METE ALGO*/
+programa                    : {dvar = 0;} OCB_ secuenciaSentencias CCB_ {verTdS();}
                             ;
 secuenciaSentencias         : sentencia 
                             | secuenciaSentencias sentencia
@@ -48,7 +55,7 @@ sentencia                   : declaracion
                             ;
 declaracion                 : tipoSimple ID_ SC_
                                 {
-                                    if(!insTdS($2, $1, dvar)) {
+                                    if(!insTdS($2, $1, dvar, -1)) {
                                         yyerror(E_REPEATED_DECLARATION);
                                     } else {
                                         dvar += TALLA_TIPO_SIMPLE;
@@ -56,7 +63,7 @@ declaracion                 : tipoSimple ID_ SC_
                                 }
                             | tipoSimple ID_ ASIG_ constante SC_
                                 {
-                                    if(!insTdS($2, $1, dvar)) {
+                                    if(!insTdS($2, $1, dvar, -1)) {
                                         yyerror(E_REPEATED_DECLARATION);
                                     } else {
                                         dvar += TALLA_TIPO_SIMPLE;
@@ -75,14 +82,14 @@ declaracion                 : tipoSimple ID_ SC_
                                     } else {
                                         dvar += numelem * TALLA_TIPO_SIMPLE;
                                     }
-                                    // comprobar tipos
                                 }
                             | STRUCT_ OCB_ listaCampos CCB_ ID_ SC_
                                 {
-                                    // var listaCampos
-                                    // T.t = tregistro(LC.t)
-                                    $3.listaCampos = 
-                                    // dvar += listaCampos.talla
+                                    if(!insTdS($5, T_RECORD, dvar, $3.refe)) {
+                                        yyerror(E_REPEATED_DECLARATION);
+                                    } else {
+                                        dvar += $3.talla;
+                                    }
                                 }
                             ;
 tipoSimple                  : INT_  {$$ = T_ENTERO;}
@@ -90,15 +97,15 @@ tipoSimple                  : INT_  {$$ = T_ENTERO;}
                             ;
 listaCampos                 : tipoSimple ID_ SC_
                                 {
-                                    int refe = insTdR($$.refe, $2, $1, dvar);
-                                    CAMP camp = obtTdR(refe, $2);
-                                    dvar += camp.desp;
+                                    $$.refe = insTdR(-1, $2, $1, 0);
+                                    $$.talla = TALLA_TIPO_SIMPLE;
                                 }
                             | listaCampos tipoSimple ID_ SC_
                                 {
-                                    int refe = insTdR($$.refe, $3, $2, dvar);
-                                    CAMP camp = obtTdR(refe, $3);
-                                    dvar += camp.desp;
+                                    if (!insTdR($1.refe, $3, $2, $1.talla)) {
+                                        yyerror(E_REPEATED_DECLARATION);
+                                    }
+                                    $$.talla = $1.talla + TALLA_TIPO_SIMPLE;
                                 }
                             ;
 instruccion                 : OCB_ CCB_
@@ -152,9 +159,10 @@ expresionSufija             : OB_ expresion CB_
                             | ID_ DOT_ ID_
                             | constante
                             ;
-constante                   : CTE_ {$$.tipo = T_ENTERO;}
-                            | TRUE_ {$$.tipo = T_LOGICO;}
-                            | FALSE_ {$$.tipo = T_LOGICO;}
+constante                   : CTE_    {$$.tipo = T_ENTERO; $$.valor = $1/1;}
+                            | TRUE_   {$$.tipo = T_LOGICO; $$.valor = 1;}
+                            | FALSE_  {$$.tipo = T_LOGICO; $$.valor = 0;}
+                            ;
                             ;
 operadorAsignacion          : ASIG_
                             | MASASIG_
