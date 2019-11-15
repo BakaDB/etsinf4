@@ -29,15 +29,14 @@
 /************************************************ Struct para las expresions */
 typedef struct exp {
     int tipo;
-    int pos;
+    int valor;
 } EXP;
 
-/***************************************************** Struct para los while */
-typedef struct ins_while {
-    int tipo;
-    int valor;
-    // ?????????
-} INS_WHILEP;
+/********************************************* Struct para los listaDeCampos */
+typedef struct lc {
+    int refe;
+    int talla;
+} LC;
 
 /************************************* Variables externas definidas en el AL */
 extern int yylex();
