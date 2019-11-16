@@ -29,12 +29,11 @@
 /************************************************ Struct para las expresions */
 typedef struct exp {
     int tipo;
-    int valor;
 } EXP;
 
 /********************************************* Struct para los listaDeCampos */
 typedef struct lc {
-    int refe;
+    int ref;
     int talla;
 } LC;
 
