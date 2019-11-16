@@ -30,22 +30,22 @@
 %token<ident> ID_
 %token<cent> CTE_
 
-%type<lc> listaCampos
-
 %type<cent> tipoSimple
 
-%type<exp> constante
+%type<exp> constante expresion expresionLogica expresionIgualdad expresionRelacional 
+//%type<exp> expresionAditiva expresionMultiplicativa expresionUnaria expresionSufija
+
+%type<lc> listaCampos
 
 /*
 %type<cent> operadorAditivo operadorAsignacion operadorIgualdad operadorIncremento operadorLogico operadorMultiplicativo
 %type<cent> operadorRelacional operadorUnario instruccionSeleccion
 
-%type<exp> constante expresion expresionAditiva expresionIgualdad expresionLogica expresionMultiplicativa expresionRelacional
-%type<exp> expresionSufija expresionUnaria instruccionExpresion???????????
+%type<exp> instruccionExpresion???????????
 */
 
 %%
-programa                    : {dvar = 0;} OCB_ secuenciaSentencias CCB_ {verTdS();}
+programa                    : {dvar = 0;} OCB_ secuenciaSentencias CCB_ {if (verTDS) verTdS();}
                             ;
 secuenciaSentencias         : sentencia 
                             | secuenciaSentencias sentencia
@@ -76,8 +76,8 @@ declaracion                 : tipoSimple ID_ SC_
                                         yyerror(E_ARRAY_SIZE_INVALID);
                                         numelem = 0;
                                     }
-                                    int refe = insTdA($1, numelem);
-                                    if (!insTdS($2, T_ARRAY, dvar, refe)) {
+                                    int ref = insTdA($1, numelem);
+                                    if (!insTdS($2, T_ARRAY, dvar, ref)) {
                                         yyerror(E_REPEATED_DECLARATION);
                                     } else {
                                         dvar += numelem * TALLA_TIPO_SIMPLE;
@@ -85,7 +85,7 @@ declaracion                 : tipoSimple ID_ SC_
                                 }
                             | STRUCT_ OCB_ listaCampos CCB_ ID_ SC_
                                 {
-                                    if(!insTdS($5, T_RECORD, dvar, $3.refe)) {
+                                    if(!insTdS($5, T_RECORD, dvar, $3.ref)) {
                                         yyerror(E_REPEATED_DECLARATION);
                                     } else {
                                         dvar += $3.talla;
@@ -97,12 +97,12 @@ tipoSimple                  : INT_  {$$ = T_ENTERO;}
                             ;
 listaCampos                 : tipoSimple ID_ SC_
                                 {
-                                    $$.refe = insTdR(-1, $2, $1, 0);
+                                    $$.ref = insTdR(-1, $2, $1, 0);
                                     $$.talla = TALLA_TIPO_SIMPLE;
                                 }
                             | listaCampos tipoSimple ID_ SC_
                                 {
-                                    if (!insTdR($1.refe, $3, $2, $1.talla)) {
+                                    if (!insTdR($1.ref, $3, $2, $1.talla)) {
                                         yyerror(E_REPEATED_DECLARATION);
                                     }
                                     $$.talla = $1.talla + TALLA_TIPO_SIMPLE;
@@ -129,15 +129,91 @@ instruccionExpresion        : expresion SC_
                             | SC_
                             ;
 expresion                   : expresionLogica
+                                {
+                                    $$.tipo = $1.tipo;
+                                }
                             | ID_ operadorAsignacion expresion
+                                {
+                                    $$.tipo = T_ERROR;
+                                    SIMB simb = obtTdS($1);
+                                    if ($3.tipo != T_ERROR) {
+                                        if (simb.tipo == T_ERROR) {
+                                            yyerror(E_UNDECLARED);
+                                        } else if (!((simb.tipo == T_LOGICO && $3.tipo == T_LOGICO) || (simb.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
+                                            yyerror(E_TYPE_MISMATCH);
+                                        } else {
+                                            $$.tipo = $3.tipo;
+                                        }
+                                    }
+                                }
                             | ID_ OSB_ expresion CSB_ operadorAsignacion expresion
+                                {
+                                    $$.tipo = T_ERROR;
+                                    SIMB simb = obtTdS($1);
+                                    if ($6.tipo != T_ERROR) {
+                                        if (simb.tipo == T_ERROR) {
+                                            yyerror(E_UNDECLARED);
+                                        } else if (simb.tipo != T_ARRAY) {
+                                            yyerror(E_TYPE_MISMATCH);
+                                        } else if ($3.tipo != T_ENTERO) {
+                                            yyerror(E_ARRAY_INDEX_TYPE);
+                                        } else {
+                                            DIM dim = obtTdA(simb.ref);
+                                            if (dim.telem != $6.tipo) {
+                                                yyerror(E_TYPE_MISMATCH);
+                                            } else {
+                                                $$.tipo = $6.tipo;
+                                            }
+                                        }
+                                    }
+                                }
                             | ID_ DOT_ ID_ operadorAsignacion expresion
+                                {
+                                    $$.tipo = T_ERROR;
+                                    SIMB simb = obtTdS($1);
+                                    if ($5.tipo != T_ERROR) {
+                                        if (simb.tipo == T_ERROR) {
+                                            yyerror(E_UNDECLARED);
+                                        } else if (simb.tipo != T_RECORD) {
+                                            yyerror(E_TYPE_MISMATCH);
+                                        } else {
+                                            CAMP camp = obtTdR(simb.ref, $3);
+                                            if (camp.tipo != $5.tipo) {
+                                                yyerror(E_TYPE_MISMATCH);
+                                            } else {
+                                                $$.tipo = $5.tipo;
+                                            }
+                                        }
+                                    }
+                                }
                             ;
 expresionLogica             : expresionIgualdad
+                                {
+                                    $$.tipo = $1.tipo;
+                                }
                             | expresionLogica operadorLogico expresionIgualdad
+                                {
+                                    $$.tipo = T_ERROR;
+                                    if (!($1.tipo == T_LOGICO && $3.tipo == T_LOGICO)) {
+                                        yyerror(E_TYPE_MISMATCH);
+                                    } else {
+                                        $$.tipo = T_LOGICO;
+                                    }
+                                }
                             ;
 expresionIgualdad           : expresionRelacional
+                                {
+                                    $$.tipo = $1.tipo;
+                                }
                             | expresionIgualdad operadorIgualdad expresionRelacional
+                                {
+                                    $$.tipo = T_ERROR;
+                                    if (!(($1.tipo == T_LOGICO && $3.tipo == T_LOGICO) || ($1.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
+                                        yyerror(E_TYPE_MISMATCH);
+                                    } else {
+                                        $$.tipo = T_LOGICO;
+                                    }
+                                }
                             ;
 expresionRelacional         : expresionAditiva
                             | expresionRelacional operadorRelacional expresionAditiva
@@ -159,9 +235,9 @@ expresionSufija             : OB_ expresion CB_
                             | ID_ DOT_ ID_
                             | constante
                             ;
-constante                   : CTE_    {$$.tipo = T_ENTERO; $$.valor = $1/1;}
-                            | TRUE_   {$$.tipo = T_LOGICO; $$.valor = 1;}
-                            | FALSE_  {$$.tipo = T_LOGICO; $$.valor = 0;}
+constante                   : CTE_    {$$.tipo = T_ENTERO;} /*Deberia truncar el valor de $1 <- $1 / 1 */
+                            | TRUE_   {$$.tipo = T_LOGICO;}
+                            | FALSE_  {$$.tipo = T_LOGICO;}
                             ;
                             ;
 operadorAsignacion          : ASIG_
