@@ -94,7 +94,6 @@ listaCampos                 : tipoSimple ID_ SC_
                                 {
                                     $$.ref = insTdR(-1, $2, $1, 0);
                                     $$.talla = TALLA_TIPO_SIMPLE;
-
                                 }
                             | listaCampos tipoSimple ID_ SC_
                                 {
