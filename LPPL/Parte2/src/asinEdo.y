@@ -245,12 +245,46 @@ expresionAditiva            : expresionMultiplicativa
                                     }
                                 }
                             ;
+                            
 expresionMultiplicativa     : expresionUnaria
+                                {
+                                    $$.tipo = $1.tipo
+                                }
                             | expresionMultiplicativa operadorMultiplicativo expresionUnaria
+                                {
+                                    $$.tipo = T_ERROR;
+                                    if(!($1.tipo == T_ENTERO && $3.tipo == T_ENTERO)){
+                                        yyerror(E_TYPE_MISMATCH);
+                                    }else{
+                                        $$.tipo = T_ENTERO;
+                                    }
+                                }
                             ;
 expresionUnaria             : expresionSufija
+                                {
+                                    $$.tipo = $1.tipo 
+                                }
                             | operadorUnario expresionUnaria
+                                {
+                                    $$.tipo = T_ERROR;
+                                    if($2.tipo == T_ENTERO){
+                                        $$.tipo = T_ENTERO;
+                                    }else if($2.tipo == T_LOGICO){
+                                        $$.tipo = T_LOGICO;
+                                    }else{
+                                        yyerror(E_TYPE_MISMATCH)
+                                    }
+                                }
                             | operadorIncremento ID_
+                                {
+                                    $$.tipo = T_ERROR;
+                                    SIMB simb = obtTDS($2);
+                                    if(simb.tipo == T_ENTERO){
+                                        $$.tipo = T_ENTERO;
+                                    }else{
+                                        yyerror(E_TYPE_MISMATCH);
+                                    }
+                                }
                             ;
 
 expresionSufija             : OB_ expresion CB_ {$$.tipo = $2.tipo;} 
