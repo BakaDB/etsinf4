@@ -9,6 +9,7 @@
 #define T_ARRAY       3
 #define T_RECORD      4
 #define T_ERROR       5
+
 typedef struct simb /******************************** Estructura para la TDS */
 {
   int   tipo;            /* Tipo del objeto                                  */
@@ -25,6 +26,7 @@ typedef struct reg  /* Estructura para los campos de un registro             */
   int   tipo;                          /* Tipo del campo                     */
   int   desp;                          /* Desplazamiento relativo en memoria */
 } CAMP;
+
 /*************************** Variables globales de uso en todo el compilador */
 int dvar;            /* Desplazamiento relativo en el Segmento de Variables  */
 
@@ -67,5 +69,5 @@ CAMP obtTdR(int ref, char *nom) ;
 void verTdS () ;
 /* Muestra toda la informacion de la TDS.                                    */
 
-#endif  /* _LIBTDS_H */
+#endif                        /* _LIBTDS_H */
 /*****************************************************************************/

@@ -9,10 +9,10 @@
 %}
 
 %union {
-    int cent;   
-    char *ident;
-    EXP exp;
-    LC lc;  
+  int cent;
+  char *ident;
+  EXP exp;
+  LC lc;  
 }
 
 %token READ_ PRINT_ IF_ ELSE_ WHILE_
@@ -33,7 +33,7 @@
 %type<cent> tipoSimple
 
 %type<exp> constante expresion expresionLogica expresionIgualdad expresionRelacional 
-%type<exp> expresionAditiva expresionMultiplicativa expresionUnaria expresionSufija
+//%type<exp> expresionAditiva expresionMultiplicativa expresionUnaria expresionSufija
 
 %type<lc> listaCampos
 
@@ -45,7 +45,7 @@
 */
 
 %%
-programa                    : { dvar = 0; } OCB_ secuenciaSentencias CCB_ { if (verTDS) verTdS(); }
+programa                    : {dvar = 0;} OCB_ secuenciaSentencias CCB_ {if (verTDS) verTdS();}
                             ;
 secuenciaSentencias         : sentencia 
                             | secuenciaSentencias sentencia
@@ -139,11 +139,10 @@ expresion                   : expresionLogica
                                     if ($3.tipo != T_ERROR) {
                                         if (simb.tipo == T_ERROR) {
                                             yyerror(E_UNDECLARED);
-                                        } else if (!((simb.tipo == T_LOGICO && $3.tipo == T_LOGICO) || 
-                                                     (simb.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
+                                        } else if (!((simb.tipo == T_LOGICO && $3.tipo == T_LOGICO) || (simb.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
                                             yyerror(E_TYPE_MISMATCH);
                                         } else {
-                                            $$.tipo = simb.tipo;
+                                            $$.tipo = $3.tipo;
                                         }
                                     }
                                 }
@@ -163,7 +162,7 @@ expresion                   : expresionLogica
                                             if (dim.telem != $6.tipo) {
                                                 yyerror(E_TYPE_MISMATCH);
                                             } else {
-                                                $$.tipo = simb.tipo;
+                                                $$.tipo = $6.tipo;
                                             }
                                         }
                                     }
@@ -182,7 +181,7 @@ expresion                   : expresionLogica
                                             if (camp.tipo != $5.tipo) {
                                                 yyerror(E_TYPE_MISMATCH);
                                             } else {
-                                                $$.tipo = simb.tipo;
+                                                $$.tipo = $5.tipo;
                                             }
                                         }
                                     }
@@ -209,152 +208,36 @@ expresionIgualdad           : expresionRelacional
                             | expresionIgualdad operadorIgualdad expresionRelacional
                                 {
                                     $$.tipo = T_ERROR;
-                                    if (!(($1.tipo == T_LOGICO && $3.tipo == T_LOGICO) || 
-                                          ($1.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
+                                    if (!(($1.tipo == T_LOGICO && $3.tipo == T_LOGICO) || ($1.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
                                         yyerror(E_TYPE_MISMATCH);
                                     } else {
                                         $$.tipo = T_LOGICO;
                                     }
                                 }
-                            ;                            
+                            ;
 expresionRelacional         : expresionAditiva
-                                {
-                                    $$.tipo = $1.tipo;
-                                }
                             | expresionRelacional operadorRelacional expresionAditiva
-                                {
-                                    $$.tipo = T_ERROR;
-                                    if (!(($1.tipo == T_LOGICO && $3.tipo == T_LOGICO) || 
-                                          ($1.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
-                                        yyerror(E_TYPE_MISMATCH);
-                                    } else {
-                                        $$.tipo = T_LOGICO;
-                                    }
-                                }
                             ;
 expresionAditiva            : expresionMultiplicativa
-                                {
-                                    $$.tipo = $1.tipo;
-                                }
                             | expresionAditiva operadorAditivo expresionMultiplicativa
-                                {
-                                    $$.tipo = T_ERROR;
-                                    if (!($1.tipo == T_ENTERO && $3.tipo == T_ENTERO)) {
-                                        yyerror(E_TYPE_MISMATCH);
-                                    } else {
-                                        $$.tipo = T_ENTERO;
-                                    }
-                                }
-                            ;                            
+                            ;
 expresionMultiplicativa     : expresionUnaria
-                                {
-                                    $$.tipo = $1.tipo;
-                                }
                             | expresionMultiplicativa operadorMultiplicativo expresionUnaria
-                                {
-                                    $$.tipo = T_ERROR;
-                                    if (!($1.tipo == T_ENTERO && $3.tipo == T_ENTERO)) {
-                                        yyerror(E_TYPE_MISMATCH);
-                                    } else {
-                                        $$.tipo = T_ENTERO;
-                                    }
-                                }
                             ;
 expresionUnaria             : expresionSufija
-                                {
-                                    $$.tipo = $1.tipo;
-                                }
                             | operadorUnario expresionUnaria
-                                {
-                                    $$.tipo = T_ERROR;
-                                    if (!($2.tipo == T_ENTERO || $2.tipo == T_LOGICO)) {
-                                        yyerror(E_TYPE_MISMATCH);
-                                    } else {
-                                        $$.tipo = $2.tipo;
-                                    }
-                                }
                             | operadorIncremento ID_
-                                {
-                                    $$.tipo = T_ERROR;
-                                    SIMB simb = obtTdS($2);
-                                    if (!(simb.tipo == T_ERROR)) {                                        
-                                        if (simb.tipo != T_ENTERO) {
-                                            yyerror(E_TYPE_MISMATCH);
-                                        } else {
-                                            $$.tipo = T_ENTERO;
-                                        }
-                                    }
-                                }
                             ;
 expresionSufija             : OB_ expresion CB_
-                                {
-                                    $$.tipo = $2.tipo;
-                                } 
                             | ID_ operadorIncremento
-                                {
-                                    $$.tipo = T_ERROR;
-                                    SIMB simb = obtTdS($1);
-                                    if (!(simb.tipo == T_ERROR)) {                                        
-                                        if (simb.tipo != T_ENTERO) {
-                                            yyerror(E_TYPE_MISMATCH);
-                                        } else {
-                                            $$.tipo = T_ENTERO;
-                                        }
-                                    }
-                                }
                             | ID_ OSB_ expresion CSB_
-                                {
-                                    $$.tipo = T_ERROR;
-                                    SIMB simb = obtTdS($1);
-                                    if (simb.tipo == T_ERROR) {
-                                        yyerror(E_UNDECLARED);
-                                    } else {
-                                        if (!(simb.tipo == T_ARRAY)) {
-                                            yyerror(E_TYPE_MISMATCH);
-                                        } else {
-                                            DIM dim = obtTdA(simb.ref);
-                                            if (dim.telem == T_ERROR) {
-                                                yyerror(E_UNDECLARED);
-                                            } else {
-                                                $$.tipo = dim.telem;
-                                            }
-                                        }
-                                    }
-                                }
                             | ID_
-                                {
-                                    $$.tipo = T_ERROR;
-                                    SIMB simb = obtTdS($1);
-                                    if (simb.tipo == T_ERROR) {
-                                        yyerror(E_UNDECLARED);
-                                    } else {
-                                        $$.tipo = simb.tipo;
-                                    }
-                                }
-                            | ID_ DOT_ ID_ 
-                                {
-                                    $$.tipo = T_ERROR;
-                                    SIMB simb = obtTdS($1);
-                                    if (simb.tipo == T_ERROR) {
-                                        yyerror(E_UNDECLARED);
-                                    } else {
-                                        if (!(simb.tipo == T_RECORD)) {
-                                            yyerror(E_TYPE_MISMATCH);
-                                        } else {
-                                            CAMP camp = obtTdR(simb.ref, $3);
-                                            if (camp.tipo == T_ERROR) {
-                                                yyerror(E_UNDECLARED);
-                                            } else {
-                                                $$.tipo = camp.tipo;
-                                            }
-                                        }
-                                    }
-                                }
-                            | constante { $$.tipo = $1.tipo; }
+                            | ID_ DOT_ ID_
+                            | constante
                             ;
-constante                   : CTE_    { $$.tipo = T_ENTERO; } /*Deberia truncar el valor de $1 <- $1 / 1 */
-                            | TRUE_   { $$.tipo = T_LOGICO; }
-                            | FALSE_  { $$.tipo = T_LOGICO; }
+constante                   : CTE_    {$$.tipo = T_ENTERO;} /*Deberia truncar el valor de $1 <- $1 / 1 */
+                            | TRUE_   {$$.tipo = T_LOGICO;}
+                            | FALSE_  {$$.tipo = T_LOGICO;}
                             ;
                             ;
 operadorAsignacion          : ASIG_
