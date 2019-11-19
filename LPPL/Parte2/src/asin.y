@@ -35,14 +35,9 @@
 %type<exp> constante expresion expresionLogica expresionIgualdad expresionRelacional 
 %type<exp> expresionAditiva expresionMultiplicativa expresionUnaria expresionSufija
 
+%type<exp> instruccionEntradaSalida instruccionIteracion
+
 %type<lc> listaCampos
-
-/*
-%type<cent> operadorAditivo operadorAsignacion operadorIgualdad operadorIncremento operadorLogico operadorMultiplicativo
-%type<cent> operadorRelacional operadorUnario instruccionSeleccion
-
-%type<exp> instruccionExpresion???????????
-*/
 
 %%
 programa                    : { dvar = 0; } OCB_ secuenciaSentencias CCB_ { if (verTDS) verTdS(); }
@@ -92,13 +87,14 @@ declaracion                 : tipoSimple ID_ SC_
                                     }
                                 }
                             ;
-tipoSimple                  : INT_  {$$ = T_ENTERO;}
-                            | BOOL_ {$$ = T_LOGICO;}
+tipoSimple                  : INT_  { $$ = T_ENTERO; }
+                            | BOOL_ { $$ = T_LOGICO; }
                             ;
 listaCampos                 : tipoSimple ID_ SC_
                                 {
                                     $$.ref = insTdR(-1, $2, $1, 0);
                                     $$.talla = TALLA_TIPO_SIMPLE;
+
                                 }
                             | listaCampos tipoSimple ID_ SC_
                                 {
@@ -119,11 +115,42 @@ listaInstrucciones          : instruccion
                             | listaInstrucciones instruccion
                             ;
 instruccionEntradaSalida    : READ_ OB_ ID_ CB_ SC_
+                                {
+                                    $$.tipo = T_ERROR;
+                                    SIMB simb = obtTdS($3);
+                                    if (simb.tipo == T_ERROR) {
+                                        yyerror(E_UNDECLARED);
+                                    } else {
+                                        if (simb.tipo != T_ENTERO) {
+                                            yyerror(E_TYPE_MISMATCH);
+                                        }
+                                    }
+                                }
                             | PRINT_ OB_ expresion CB_ SC_
+                                {
+                                    $$.tipo = T_ERROR;
+                                    if ($3.tipo == T_ERROR) {
+                                        yyerror(E_UNDECLARED);
+                                    } else {
+                                        if ($3.tipo != T_ENTERO) {
+                                            yyerror(E_TYPE_MISMATCH);
+                                        }
+                                    }
+                                }
                             ;
 instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccion
                             ;
 instruccionIteracion        : WHILE_ OB_ expresion CB_ instruccion
+                                {
+                                    $$.tipo = T_ERROR;
+                                    if ($3.tipo == T_ERROR) {
+                                        yyerror(E_UNDECLARED);
+                                    } else {
+                                        if ($3.tipo != T_LOGICO) {
+                                            yyerror(E_TYPE_MISMATCH);
+                                        }
+                                    }
+                                }
                             ;
 instruccionExpresion        : expresion SC_
                             | SC_
