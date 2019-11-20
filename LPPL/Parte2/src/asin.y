@@ -116,7 +116,7 @@ instruccionEntradaSalida    : READ_ OB_ ID_ CB_ SC_
                                     SIMB simb = obtTdS($3);
                                     if (simb.tipo == T_ERROR) {
                                         yyerror("Variable no declarada en instruccion read 007");
-                                    } else {instruccionEntradaSalida
+                                    } else {
                                         if (simb.tipo != T_ENTERO) {
                                             yyerror("Variable de instruccion read no es tipo entero 008");
                                         }
