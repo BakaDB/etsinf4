@@ -35,8 +35,6 @@
 %type<exp> constante expresion expresionLogica expresionIgualdad expresionRelacional 
 %type<exp> expresionAditiva expresionMultiplicativa expresionUnaria expresionSufija
 
-%type<exp> instruccionEntradaSalida instruccionIteracion
-
 %type<lc> listaCampos
 
 %%
@@ -51,7 +49,7 @@ sentencia                   : declaracion
 declaracion                 : tipoSimple ID_ SC_
                                 {
                                     if(!insTdS($2, $1, dvar, -1)) {
-                                        yyerror(E_REPEATED_DECLARATION);
+                                        yyerror("Declarion repetida de tipo simple 001");
                                     } else {
                                         dvar += TALLA_TIPO_SIMPLE;
                                     }
@@ -59,7 +57,7 @@ declaracion                 : tipoSimple ID_ SC_
                             | tipoSimple ID_ ASIG_ constante SC_
                                 {
                                     if(!insTdS($2, $1, dvar, -1)) {
-                                        yyerror(E_REPEATED_DECLARATION);
+                                        yyerror("Declaracion y asignacion repetida de tipo simple 002");
                                     } else {
                                         dvar += TALLA_TIPO_SIMPLE;
                                     }
@@ -68,12 +66,12 @@ declaracion                 : tipoSimple ID_ SC_
                                 {
                                     int numelem = $4;
                                     if ($4 < 1) {
-                                        yyerror(E_ARRAY_SIZE_INVALID);
+                                        yyerror("Declaracion de array con talla invalida 003");
                                         numelem = 0;
                                     }
                                     int ref = insTdA($1, numelem);
                                     if (!insTdS($2, T_ARRAY, dvar, ref)) {
-                                        yyerror(E_REPEATED_DECLARATION);
+                                        yyerror("Declaracion repetida de tipo array 004");
                                     } else {
                                         dvar += numelem * TALLA_TIPO_SIMPLE;
                                     }
@@ -81,7 +79,7 @@ declaracion                 : tipoSimple ID_ SC_
                             | STRUCT_ OCB_ listaCampos CCB_ ID_ SC_
                                 {
                                     if(!insTdS($5, T_RECORD, dvar, $3.ref)) {
-                                        yyerror(E_REPEATED_DECLARATION);
+                                        yyerror("Declaracion repetida de tipo struct 005");
                                     } else {
                                         dvar += $3.talla;
                                     }
@@ -97,8 +95,8 @@ listaCampos                 : tipoSimple ID_ SC_
                                 }
                             | listaCampos tipoSimple ID_ SC_
                                 {
-                                    if (!insTdR($1.ref, $3, $2, $1.talla)) {
-                                        yyerror(E_REPEATED_DECLARATION);
+                                    if (insTdR($1.ref, $3, $2, $1.talla) < 0) {
+                                        yyerror("Declaracion repetida de un campo de un struct 006");
                                     }
                                     $$.talla = $1.talla + TALLA_TIPO_SIMPLE;
                                 }
@@ -115,24 +113,22 @@ listaInstrucciones          : instruccion
                             ;
 instruccionEntradaSalida    : READ_ OB_ ID_ CB_ SC_
                                 {
-                                    $$.tipo = T_ERROR;
                                     SIMB simb = obtTdS($3);
                                     if (simb.tipo == T_ERROR) {
-                                        yyerror(E_UNDECLARED);
-                                    } else {
+                                        yyerror("Variable no declarada en instruccion read 007");
+                                    } else {instruccionEntradaSalida
                                         if (simb.tipo != T_ENTERO) {
-                                            yyerror(E_TYPE_MISMATCH);
+                                            yyerror("Variable de instruccion read no es tipo entero 008");
                                         }
                                     }
                                 }
                             | PRINT_ OB_ expresion CB_ SC_
                                 {
-                                    $$.tipo = T_ERROR;
                                     if ($3.tipo == T_ERROR) {
-                                        yyerror(E_UNDECLARED);
+                                        yyerror("Variable no declarada en instruccion print 009");
                                     } else {
                                         if ($3.tipo != T_ENTERO) {
-                                            yyerror(E_TYPE_MISMATCH);
+                                            yyerror("Variable de instruccion print no es tipo entero 010");
                                         }
                                     }
                                 }
@@ -141,12 +137,11 @@ instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccio
                             ;
 instruccionIteracion        : WHILE_ OB_ expresion CB_ instruccion
                                 {
-                                    $$.tipo = T_ERROR;
                                     if ($3.tipo == T_ERROR) {
-                                        yyerror(E_UNDECLARED);
+                                        yyerror("Variable no declarada en instruccion while 011");
                                     } else {
                                         if ($3.tipo != T_LOGICO) {
-                                            yyerror(E_TYPE_MISMATCH);
+                                            yyerror("Variable de instruccion while no es tipo logico 012");
                                         }
                                     }
                                 }
@@ -164,10 +159,10 @@ expresion                   : expresionLogica
                                     SIMB simb = obtTdS($1);
                                     if ($3.tipo != T_ERROR) {
                                         if (simb.tipo == T_ERROR) {
-                                            yyerror(E_UNDECLARED);
+                                            yyerror("Variable de tipo simple asignada no declarada 013");
                                         } else if (!((simb.tipo == T_LOGICO && $3.tipo == T_LOGICO) || 
                                                      (simb.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
-                                            yyerror(E_TYPE_MISMATCH);
+                                            yyerror("Error de tipos en la asignacion 014");
                                         } else {
                                             $$.tipo = simb.tipo;
                                         }
@@ -179,15 +174,15 @@ expresion                   : expresionLogica
                                     SIMB simb = obtTdS($1);
                                     if ($6.tipo != T_ERROR) {
                                         if (simb.tipo == T_ERROR) {
-                                            yyerror(E_UNDECLARED);
+                                            yyerror("Variable de array asignada no declarada 015");
                                         } else if (simb.tipo != T_ARRAY) {
-                                            yyerror(E_TYPE_MISMATCH);
+                                            yyerror("Error de tipos en asignacion 016");
                                         } else if ($3.tipo != T_ENTERO) {
                                             yyerror(E_ARRAY_INDEX_TYPE);
                                         } else {
                                             DIM dim = obtTdA(simb.ref);
                                             if (dim.telem != $6.tipo) {
-                                                yyerror(E_TYPE_MISMATCH);
+                                                yyerror("Declaracion de array con talla invalida en asignacion 017");
                                             } else {
                                                 $$.tipo = simb.tipo;
                                             }
@@ -252,7 +247,7 @@ expresionRelacional         : expresionAditiva
                                     $$.tipo = T_ERROR;
                                     if (!(($1.tipo == T_LOGICO && $3.tipo == T_LOGICO) || 
                                           ($1.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
-                                        yyerror(E_TYPE_MISMATCH);
+                                        yyerror("Holis2");
                                     } else {
                                         $$.tipo = T_LOGICO;
                                     }
@@ -266,12 +261,12 @@ expresionAditiva            : expresionMultiplicativa
                                 {
                                     $$.tipo = T_ERROR;
                                     if (!($1.tipo == T_ENTERO && $3.tipo == T_ENTERO)) {
-                                        yyerror(E_TYPE_MISMATCH);
+                                        yyerror("HOLIS");
                                     } else {
                                         $$.tipo = T_ENTERO;
                                     }
                                 }
-                            ;                            
+                            ;
 expresionMultiplicativa     : expresionUnaria
                                 {
                                     $$.tipo = $1.tipo;
