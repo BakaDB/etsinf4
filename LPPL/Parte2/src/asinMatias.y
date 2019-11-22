@@ -275,7 +275,7 @@ expresionMultiplicativa     : expresionUnaria
                                 {
                                     $$.tipo = T_ERROR;
                                     if (!($1.tipo == T_ENTERO && $3.tipo == T_ENTERO)) {
-                                        yyerror("Variable de expresion multiplicativa no es de tipo entero 024");
+                                        yyerror("Variable de expresion multiplicativa no es de tipo entero 025");
                                     } else {
                                         $$.tipo = T_ENTERO;
                                     }
@@ -289,7 +289,7 @@ expresionUnaria             : expresionSufija
                                 {
                                     $$.tipo = T_ERROR;
                                     if (!($2.tipo == T_ENTERO || $2.tipo == T_LOGICO)) {
-                                        yyerror("Variable de expresion unaria no es de tipo entero ni logico 025");
+                                        yyerror("Variable de expresion unaria no es de tipo entero ni logico 026");
                                     } else {
                                         $$.tipo = $2.tipo;
                                     }
@@ -300,7 +300,7 @@ expresionUnaria             : expresionSufija
                                     SIMB simb = obtTdS($2);
                                     if (!(simb.tipo == T_ERROR)) {                                        
                                         if (simb.tipo != T_ENTERO) {
-                                            yyerror("Variable a incrementar/decrementar no es de tipo entero 026");
+                                            yyerror("Variable a incrementar/decrementar no es de tipo entero 027");
                                         } else {
                                             $$.tipo = T_ENTERO;
                                         }
@@ -317,7 +317,7 @@ expresionSufija             : OB_ expresion CB_
                                     SIMB simb = obtTdS($1);
                                     if (!(simb.tipo == T_ERROR)) {                                        
                                         if (simb.tipo != T_ENTERO) {
-                                            yyerror("Variable a incrementar/decrementar no es de tipo entero 027");
+                                            yyerror("Variable a incrementar/decrementar no es de tipo entero 028");
                                         } else {
                                             $$.tipo = T_ENTERO;
                                         }
@@ -328,14 +328,14 @@ expresionSufija             : OB_ expresion CB_
                                     $$.tipo = T_ERROR;
                                     SIMB simb = obtTdS($1);
                                     if (simb.tipo == T_ERROR) {
-                                        yyerror("Variable de tipo array no declarada 028");
+                                        yyerror("Variable de tipo array no declarada 029");
                                     } else {
                                         if (!(simb.tipo == T_ARRAY)) {
-                                            yyerror("La variable no es de tipo array 029");
+                                            yyerror("La variable no es de tipo array 030");
                                         } else {
                                             DIM dim = obtTdA(simb.ref);
                                             if (dim.telem == T_ERROR) {
-                                                yyerror("¿Variable de tipo array no declarada? 030"); //?????
+                                                yyerror("¿Variable de tipo array no declarada? 031"); //?????
                                             } else {
                                                 $$.tipo = dim.telem;
                                             }
@@ -347,7 +347,7 @@ expresionSufija             : OB_ expresion CB_
                                     $$.tipo = T_ERROR;
                                     SIMB simb = obtTdS($1);
                                     if (simb.tipo == T_ERROR) {
-                                        yyerror("Variable no declarada 031");
+                                        yyerror("Variable no declarada 032");
                                     } else {
                                         $$.tipo = simb.tipo;
                                     }
@@ -357,14 +357,14 @@ expresionSufija             : OB_ expresion CB_
                                     $$.tipo = T_ERROR;
                                     SIMB simb = obtTdS($1);
                                     if (simb.tipo == T_ERROR) {
-                                        yyerror("Variable no declarada 032");
+                                        yyerror("Variable no declarada 033");
                                     } else {
                                         if (!(simb.tipo == T_RECORD)) {
-                                            yyerror("La variable no es de tipo struct 032");
+                                            yyerror("La variable no es de tipo struct 034");
                                         } else {
                                             CAMP camp = obtTdR(simb.ref, $3);
                                             if (camp.tipo == T_ERROR) {
-                                                yyerror("Atributo de variable tipo struct no declarado 033");
+                                                yyerror("Atributo de variable tipo struct no declarado 035");
                                             } else {
                                                 $$.tipo = camp.tipo;
                                             }
