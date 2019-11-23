@@ -201,7 +201,7 @@ expresion                   : expresionLogica
                                         } else {
                                             CAMP camp = obtTdR(simb.ref, $3);
                                             if (camp.tipo != $5.tipo) {
-                                                yyerror("Error de tipos en asignacion, el tipo del atributo no coincide con el de la expresion 021");
+                                                yyerror("Error de tipos en asignacion, el tipo de la expresion no coincide con el del atributo 021");
                                             } else {
                                                 $$.tipo = simb.tipo;
                                             }
@@ -373,7 +373,7 @@ expresionSufija             : OB_ expresion CB_
                                 }
                             | constante { $$.tipo = $1.tipo; }
                             ;
-constante                   : CTE_    { $$.tipo = T_ENTERO; } /*Deberia truncar el valor de $1 <- $1 / 1 */
+constante                   : CTE_    { $$.tipo = T_ENTERO; }
                             | TRUE_   { $$.tipo = T_LOGICO; }
                             | FALSE_  { $$.tipo = T_LOGICO; }
                             ;
