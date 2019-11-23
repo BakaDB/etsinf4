@@ -134,14 +134,23 @@ instruccionEntradaSalida    : READ_ OB_ ID_ CB_ SC_
                                 }
                             ;
 instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccion
+                                {
+                                    if ($3.tipo == T_ERROR) {
+                                        yyerror("Variable no declarada en instruccion if 011");
+                                    } else {
+                                        if ($3.tipo != T_LOGICO) {
+                                            yyerror("Variable de instruccion if no es tipo logico 012");
+                                        }
+                                    }
+                                }
                             ;
 instruccionIteracion        : WHILE_ OB_ expresion CB_ instruccion
                                 {
                                     if ($3.tipo == T_ERROR) {
-                                        yyerror("Variable no declarada en instruccion while 011");
+                                        yyerror("Variable no declarada en instruccion while 013");
                                     } else {
                                         if ($3.tipo != T_LOGICO) {
-                                            yyerror("Variable de instruccion while no es tipo logico 012");
+                                            yyerror("Variable de instruccion while no es tipo logico 014");
                                         }
                                     }
                                 }
@@ -159,10 +168,10 @@ expresion                   : expresionLogica
                                     SIMB simb = obtTdS($1);
                                     if ($3.tipo != T_ERROR) {
                                         if (simb.tipo == T_ERROR) {
-                                            yyerror("Variable de tipo simple asignada no declarada 013");
+                                            yyerror("Variable de tipo simple asignada no declarada 015");
                                         } else if (!((simb.tipo == T_LOGICO && $3.tipo == T_LOGICO) || 
                                                      (simb.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
-                                            yyerror("Error de tipos en la asignacion 014");
+                                            yyerror("Error de tipos en la asignacion 016");
                                         } else {
                                             $$.tipo = simb.tipo;
                                         }
@@ -174,15 +183,15 @@ expresion                   : expresionLogica
                                     SIMB simb = obtTdS($1);
                                     if ($6.tipo != T_ERROR) {
                                         if (simb.tipo == T_ERROR) {
-                                            yyerror("Variable de array asignada no declarada 015");
+                                            yyerror("Variable de array asignada no declarada 017");
                                         } else if (simb.tipo != T_ARRAY) {
-                                            yyerror("Error de tipos en asignacion 016");
+                                            yyerror("Error de tipos en asignacion 018");
                                         } else if ($3.tipo != T_ENTERO) {
-                                            yyerror(E_ARRAY_INDEX_TYPE);
+                                            yyerror("El indice del array no es un entero 019");
                                         } else {
                                             DIM dim = obtTdA(simb.ref);
                                             if (dim.telem != $6.tipo) {
-                                                yyerror("Declaracion de array con talla invalida en asignacion 017");
+                                                yyerror("Declaracion de array con talla invalida en asignacion 020");
                                             } else {
                                                 $$.tipo = simb.tipo;
                                             }
@@ -195,13 +204,13 @@ expresion                   : expresionLogica
                                     SIMB simb = obtTdS($1);
                                     if ($5.tipo != T_ERROR) {
                                         if (simb.tipo == T_ERROR) {
-                                            yyerror(E_UNDECLARED);
+                                            yyerror("Variable de tipo struct asignada no declarada 021");
                                         } else if (simb.tipo != T_RECORD) {
-                                            yyerror(E_TYPE_MISMATCH);
+                                            yyerror("La variable no es de tipo struct 022");
                                         } else {
                                             CAMP camp = obtTdR(simb.ref, $3);
                                             if (camp.tipo != $5.tipo) {
-                                                yyerror(E_TYPE_MISMATCH);
+                                                yyerror("Error de tipos en asignacion, el tipo de la expresion no coincide con el del atributo 023");
                                             } else {
                                                 $$.tipo = simb.tipo;
                                             }
@@ -216,10 +225,12 @@ expresionLogica             : expresionIgualdad
                             | expresionLogica operadorLogico expresionIgualdad
                                 {
                                     $$.tipo = T_ERROR;
-                                    if (!($1.tipo == T_LOGICO && $3.tipo == T_LOGICO)) {
-                                        yyerror(E_TYPE_MISMATCH);
-                                    } else {
-                                        $$.tipo = T_LOGICO;
+                                    if ($1.tipo != T_ERROR && $3.tipo != T_ERROR) {
+                                        if (!($1.tipo == T_LOGICO && $3.tipo == T_LOGICO)) {
+                                            yyerror("La expresion no es de tipo logico 024");
+                                        } else {
+                                            $$.tipo = T_LOGICO;
+                                        }
                                     }
                                 }
                             ;
@@ -230,12 +241,14 @@ expresionIgualdad           : expresionRelacional
                             | expresionIgualdad operadorIgualdad expresionRelacional
                                 {
                                     $$.tipo = T_ERROR;
-                                    if (!(($1.tipo == T_LOGICO && $3.tipo == T_LOGICO) || 
-                                          ($1.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
-                                        yyerror(E_TYPE_MISMATCH);
-                                    } else {
-                                        $$.tipo = T_LOGICO;
-                                    }
+                                    if ($1.tipo != T_ERROR && $3.tipo != T_ERROR) {
+                                        if (!(($1.tipo == T_LOGICO && $3.tipo == T_LOGICO) || 
+                                              ($1.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
+                                            yyerror("Error de tipos en la comparacion de igualdad 025");
+                                        } else {
+                                            $$.tipo = T_LOGICO;
+                                        }
+                                    }                                    
                                 }
                             ;                            
 expresionRelacional         : expresionAditiva
@@ -245,12 +258,14 @@ expresionRelacional         : expresionAditiva
                             | expresionRelacional operadorRelacional expresionAditiva
                                 {
                                     $$.tipo = T_ERROR;
-                                    if (!(($1.tipo == T_LOGICO && $3.tipo == T_LOGICO) || 
-                                          ($1.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
-                                        yyerror("Holis2");
-                                    } else {
-                                        $$.tipo = T_LOGICO;
-                                    }
+                                    if ($1.tipo != T_ERROR && $3.tipo != T_ERROR) {
+                                        if (!(($1.tipo == T_LOGICO && $3.tipo == T_LOGICO) || 
+                                              ($1.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
+                                            yyerror("Error de tipos en la comparacion 026");
+                                        } else {
+                                            $$.tipo = T_LOGICO;
+                                        }
+                                    }                                    
                                 }
                             ;
 expresionAditiva            : expresionMultiplicativa
@@ -260,11 +275,13 @@ expresionAditiva            : expresionMultiplicativa
                             | expresionAditiva operadorAditivo expresionMultiplicativa
                                 {
                                     $$.tipo = T_ERROR;
-                                    if (!($1.tipo == T_ENTERO && $3.tipo == T_ENTERO)) {
-                                        yyerror("HOLIS");
-                                    } else {
-                                        $$.tipo = T_ENTERO;
-                                    }
+                                    if ($1.tipo != T_ERROR && $3.tipo != T_ERROR) {
+                                        if (!($1.tipo == T_ENTERO && $3.tipo == T_ENTERO)) {
+                                            yyerror("Variable de expresion aditiva no es de tipo entero 027");
+                                        } else {
+                                            $$.tipo = T_ENTERO;
+                                        }  
+                                    }                                    
                                 }
                             ;
 expresionMultiplicativa     : expresionUnaria
@@ -274,11 +291,13 @@ expresionMultiplicativa     : expresionUnaria
                             | expresionMultiplicativa operadorMultiplicativo expresionUnaria
                                 {
                                     $$.tipo = T_ERROR;
-                                    if (!($1.tipo == T_ENTERO && $3.tipo == T_ENTERO)) {
-                                        yyerror(E_TYPE_MISMATCH);
-                                    } else {
-                                        $$.tipo = T_ENTERO;
-                                    }
+                                    if ($1.tipo != T_ERROR && $3.tipo != T_ERROR) {
+                                        if (!($1.tipo == T_ENTERO && $3.tipo == T_ENTERO)) {
+                                            yyerror("Variable de expresion multiplicativa no es de tipo entero 028");
+                                        } else {
+                                            $$.tipo = T_ENTERO;
+                                        }
+                                    }                                    
                                 }
                             ;
 expresionUnaria             : expresionSufija
@@ -288,11 +307,13 @@ expresionUnaria             : expresionSufija
                             | operadorUnario expresionUnaria
                                 {
                                     $$.tipo = T_ERROR;
-                                    if (!($2.tipo == T_ENTERO || $2.tipo == T_LOGICO)) {
-                                        yyerror(E_TYPE_MISMATCH);
-                                    } else {
-                                        $$.tipo = $2.tipo;
-                                    }
+                                    if ($2.tipo != T_ERROR) {
+                                        if (!($2.tipo == T_ENTERO || $2.tipo == T_LOGICO)) {
+                                            yyerror("Variable de expresion unaria no es de tipo entero ni logico 029");
+                                        } else {
+                                            $$.tipo = $2.tipo;
+                                        }
+                                    }                                    
                                 }
                             | operadorIncremento ID_
                                 {
@@ -300,7 +321,7 @@ expresionUnaria             : expresionSufija
                                     SIMB simb = obtTdS($2);
                                     if (!(simb.tipo == T_ERROR)) {                                        
                                         if (simb.tipo != T_ENTERO) {
-                                            yyerror(E_TYPE_MISMATCH);
+                                            yyerror("Variable a incrementar/decrementar no es de tipo entero 030");
                                         } else {
                                             $$.tipo = T_ENTERO;
                                         }
@@ -311,13 +332,13 @@ expresionSufija             : OB_ expresion CB_
                                 {
                                     $$.tipo = $2.tipo;
                                 } 
-                            | ID_ operadorIncremento
+                            | ID_ operadorIncremento            /* REVISAR */
                                 {
                                     $$.tipo = T_ERROR;
                                     SIMB simb = obtTdS($1);
                                     if (!(simb.tipo == T_ERROR)) {                                        
                                         if (simb.tipo != T_ENTERO) {
-                                            yyerror(E_TYPE_MISMATCH);
+                                            yyerror("Variable a incrementar/decrementar no es de tipo entero 031");
                                         } else {
                                             $$.tipo = T_ENTERO;
                                         }
@@ -328,14 +349,14 @@ expresionSufija             : OB_ expresion CB_
                                     $$.tipo = T_ERROR;
                                     SIMB simb = obtTdS($1);
                                     if (simb.tipo == T_ERROR) {
-                                        yyerror(E_UNDECLARED);
+                                        yyerror("Variable de tipo array no declarada 032");
                                     } else {
                                         if (!(simb.tipo == T_ARRAY)) {
-                                            yyerror(E_TYPE_MISMATCH);
+                                            yyerror("La variable no es de tipo array 033");
                                         } else {
                                             DIM dim = obtTdA(simb.ref);
                                             if (dim.telem == T_ERROR) {
-                                                yyerror(E_UNDECLARED);
+                                                yyerror("¿Variable de tipo array no declarada? 034"); //?????
                                             } else {
                                                 $$.tipo = dim.telem;
                                             }
@@ -347,7 +368,7 @@ expresionSufija             : OB_ expresion CB_
                                     $$.tipo = T_ERROR;
                                     SIMB simb = obtTdS($1);
                                     if (simb.tipo == T_ERROR) {
-                                        yyerror(E_UNDECLARED);
+                                        yyerror("Variable no declarada 035");
                                     } else {
                                         $$.tipo = simb.tipo;
                                     }
@@ -357,14 +378,14 @@ expresionSufija             : OB_ expresion CB_
                                     $$.tipo = T_ERROR;
                                     SIMB simb = obtTdS($1);
                                     if (simb.tipo == T_ERROR) {
-                                        yyerror(E_UNDECLARED);
+                                        yyerror("Variable no declarada 036");
                                     } else {
                                         if (!(simb.tipo == T_RECORD)) {
-                                            yyerror(E_TYPE_MISMATCH);
+                                            yyerror("La variable no es de tipo struct 037");
                                         } else {
                                             CAMP camp = obtTdR(simb.ref, $3);
                                             if (camp.tipo == T_ERROR) {
-                                                yyerror(E_UNDECLARED);
+                                                yyerror("Atributo de variable tipo struct no declarado 038");
                                             } else {
                                                 $$.tipo = camp.tipo;
                                             }
@@ -373,7 +394,7 @@ expresionSufija             : OB_ expresion CB_
                                 }
                             | constante { $$.tipo = $1.tipo; }
                             ;
-constante                   : CTE_    { $$.tipo = T_ENTERO; } /*Deberia truncar el valor de $1 <- $1 / 1 */
+constante                   : CTE_    { $$.tipo = T_ENTERO; }
                             | TRUE_   { $$.tipo = T_LOGICO; }
                             | FALSE_  { $$.tipo = T_LOGICO; }
                             ;
