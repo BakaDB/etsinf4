@@ -356,10 +356,16 @@ expresionSufija             : OB_ expresion CB_
                                     } else {
                                         if (!(simb.tipo == T_ARRAY)) {
                                             yyerror("La variable no es de tipo array 033");
+                                        } else if ($3.tipo != T_ENTERO) {
+                                            yyerror("El indice del array no es de tipo entero");
                                         } else {
+                                            /* opcion 1*/////////////////////////////////////////////////
+                                            /* $$.tipo = $1.tipo; */
+                                            
+                                            /* opcion 2*/////////////////////////////////////////////////
                                             DIM dim = obtTdA(simb.ref);
                                             if (dim.telem == T_ERROR) {
-                                                yyerror("¿Variable de tipo array no declarada? 034"); //?????
+                                                yyerror("Variable de tipo array no declarada"); //?????
                                             } else {
                                                 $$.tipo = dim.telem;
                                             }
