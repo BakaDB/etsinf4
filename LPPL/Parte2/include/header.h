@@ -7,24 +7,10 @@
 #define FALSE 0
 #define TALLA_TIPO_SIMPLE 1
 
-/********************************************************* Mensajes de error */
-/* Variables */
-#define E_UNDECLARED            "La variable no ha sido declarada"
-#define E_REPEATED_DECLARATION  "La variable no puede ser declarada dos veces"
-#define E_ARRAY_SIZE_INVALID    "La talla del array no es valida"
-#define E_ARRAY_INDEX_INVALID   "El indice es invalido"
-#define E_ARRAY_INDEX_TYPE      "El indice debe ser entero"
-#define E_ARRAY_WO_INDEX        "El array solo puede ser accedido con indices"
-#define E_VAR_WITH_INDEX        "La variable no es un array, no puede ser accedida con indices"
-
-/* Estructuras de control y loops */
-#define E_IF_LOGICAL            "La expresion del if debe ser logica"
-#define E_WHILE_LOGICAL         "La expresion del while debe ser logica"
-
-/* Tipos */
-#define E_TYPE_ASIGNACION      "Tipos no coinciden en asignacion a variable"
-#define E_TYPE_LOGICA          "Tipos no coinciden en operacion logica"
-#define E_TYPE_MISMATCH         "Los tipos no coinciden"
+/******************************************************** Constantes unarias */
+#define PLUS 100
+#define MINUS 101
+#define NOT 102
 
 /************************************************ Struct para las expresions */
 typedef struct exp {

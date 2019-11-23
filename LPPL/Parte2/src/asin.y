@@ -31,6 +31,7 @@
 %token<cent> CTE_
 
 %type<cent> tipoSimple
+%type<cent> operadorUnario
 
 %type<exp> constante expresion expresionLogica expresionIgualdad expresionRelacional 
 %type<exp> expresionAditiva expresionMultiplicativa expresionUnaria expresionSufija
@@ -49,7 +50,7 @@ sentencia                   : declaracion
 declaracion                 : tipoSimple ID_ SC_
                                 {
                                     if(!insTdS($2, $1, dvar, -1)) {
-                                        yyerror("Declarion repetida de tipo simple 001");
+                                        yyerror("Declarion de tipo simple con identificador repetido 001");
                                     } else {
                                         dvar += TALLA_TIPO_SIMPLE;
                                     }
@@ -57,7 +58,7 @@ declaracion                 : tipoSimple ID_ SC_
                             | tipoSimple ID_ ASIG_ constante SC_
                                 {
                                     if(!insTdS($2, $1, dvar, -1)) {
-                                        yyerror("Declaracion y asignacion repetida de tipo simple 002");
+                                        yyerror("Declaracion y asignacion de tipo simple con identificador repetido 002");
                                     } else {
                                         dvar += TALLA_TIPO_SIMPLE;
                                     }
@@ -71,7 +72,7 @@ declaracion                 : tipoSimple ID_ SC_
                                     }
                                     int ref = insTdA($1, numelem);
                                     if (!insTdS($2, T_ARRAY, dvar, ref)) {
-                                        yyerror("Declaracion repetida de tipo array 004");
+                                        yyerror("Declaracion de tipo array con identificador repetido 004");
                                     } else {
                                         dvar += numelem * TALLA_TIPO_SIMPLE;
                                     }
@@ -79,7 +80,7 @@ declaracion                 : tipoSimple ID_ SC_
                             | STRUCT_ OCB_ listaCampos CCB_ ID_ SC_
                                 {
                                     if(!insTdS($5, T_RECORD, dvar, $3.ref)) {
-                                        yyerror("Declaracion repetida de tipo struct 005");
+                                        yyerror("Declaracion de tipo struct con identificador repetido 005");
                                     } else {
                                         dvar += $3.talla;
                                     }
@@ -135,9 +136,7 @@ instruccionEntradaSalida    : READ_ OB_ ID_ CB_ SC_
                             ;
 instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccion
                                 {
-                                    if ($3.tipo == T_ERROR) {
-                                        yyerror("Variable no declarada en instruccion if 011");
-                                    } else {
+                                    if ($3.tipo != T_ERROR) {
                                         if ($3.tipo != T_LOGICO) {
                                             yyerror("Variable de instruccion if no es tipo logico 012");
                                         }
@@ -146,9 +145,7 @@ instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccio
                             ;
 instruccionIteracion        : WHILE_ OB_ expresion CB_ instruccion
                                 {
-                                    if ($3.tipo == T_ERROR) {
-                                        yyerror("Variable no declarada en instruccion while 013");
-                                    } else {
+                                    if ($3.tipo != T_ERROR) {
                                         if ($3.tipo != T_LOGICO) {
                                             yyerror("Variable de instruccion while no es tipo logico 014");
                                         }
@@ -187,7 +184,7 @@ expresion                   : expresionLogica
                                         } else if (simb.tipo != T_ARRAY) {
                                             yyerror("Error de tipos en asignacion 018");
                                         } else if ($3.tipo != T_ENTERO) {
-                                            yyerror("El indice del array no es un entero 019");
+                                            yyerror("El indice del array no es de tipo entero 019");
                                         } else {
                                             DIM dim = obtTdA(simb.ref);
                                             if (dim.telem != $6.tipo) {
@@ -311,9 +308,15 @@ expresionUnaria             : expresionSufija
                                         if (!($2.tipo == T_ENTERO || $2.tipo == T_LOGICO)) {
                                             yyerror("Variable de expresion unaria no es de tipo entero ni logico 029");
                                         } else {
-                                            $$.tipo = $2.tipo;
+                                            if ($1 == NOT && $2.tipo != T_LOGICO) {
+                                                yyerror("No es posible realizar una operacion booleana sobre un entero");
+                                            } else if (($1 == PLUS || $1 == MINUS) && $2.tipo != T_ENTERO) {
+                                                yyerror("No es posible realizar un cambio de signo a un booleano");
+                                            } else {
+                                                $$.tipo = $2.tipo;
+                                            }
                                         }
-                                    }                                    
+                                    }
                                 }
                             | operadorIncremento ID_
                                 {
@@ -381,7 +384,7 @@ expresionSufija             : OB_ expresion CB_
                                         yyerror("Variable no declarada 036");
                                     } else {
                                         if (!(simb.tipo == T_RECORD)) {
-                                            yyerror("La variable no es de tipo struct 037");
+                                            yyerror("El identificador no es de tipo struct 037");
                                         } else {
                                             CAMP camp = obtTdR(simb.ref, $3);
                                             if (camp.tipo == T_ERROR) {
@@ -423,9 +426,9 @@ operadorMultiplicativo      : POR_
                             | DIV_
                             | MOD_
                             ;
-operadorUnario              : MAS_
-                            | MENOS_
-                            | NEG_
+operadorUnario              : MAS_      { $$ = PLUS; }
+                            | MENOS_    { $$ = MINUS; }
+                            | NEG_      { $$ = NOT; }
                             ;
 operadorIncremento          : INC_
                             | DEC_
