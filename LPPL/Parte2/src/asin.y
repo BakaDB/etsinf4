@@ -137,6 +137,8 @@ instruccionEntradaSalida    : READ_ OB_ ID_ CB_ SC_
 instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccion
                                 {
                                     if ($3.tipo != T_ERROR) {
+                                        yyerror("Variable no declarada en instruccion if 011");
+                                    } else {
                                         if ($3.tipo != T_LOGICO) {
                                             yyerror("Variable de instruccion if no es tipo logico 012");
                                         }
@@ -145,7 +147,9 @@ instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccio
                             ;
 instruccionIteracion        : WHILE_ OB_ expresion CB_ instruccion
                                 {
-                                    if ($3.tipo != T_ERROR) {
+                                    if ($3.tipo == T_ERROR) {
+                                        yyerror("Variable no declarada en instruccion while 013");
+                                    } else {
                                         if ($3.tipo != T_LOGICO) {
                                             yyerror("Variable de instruccion while no es tipo logico 014");
                                         }
@@ -359,13 +363,9 @@ expresionSufija             : OB_ expresion CB_
                                         } else if ($3.tipo != T_ENTERO) {
                                             yyerror("El indice del array no es de tipo entero");
                                         } else {
-                                            /* opcion 1*/////////////////////////////////////////////////
-                                            /* $$.tipo = $1.tipo; */
-                                            
-                                            /* opcion 2*/////////////////////////////////////////////////
                                             DIM dim = obtTdA(simb.ref);
                                             if (dim.telem == T_ERROR) {
-                                                yyerror("Variable de tipo array no declarada"); //?????
+                                                yyerror("Variable de tipo array no declarada");
                                             } else {
                                                 $$.tipo = dim.telem;
                                             }
