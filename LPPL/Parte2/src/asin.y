@@ -125,9 +125,7 @@ instruccionEntradaSalida    : READ_ OB_ ID_ CB_ SC_
                                 }
                             | PRINT_ OB_ expresion CB_ SC_
                                 {
-                                    if ($3.tipo == T_ERROR) {
-                                        yyerror("Variable no declarada en instruccion print 009");
-                                    } else {
+                                    if ($3.tipo != T_ERROR) {
                                         if ($3.tipo != T_ENTERO) {
                                             yyerror("Variable de instruccion print no es tipo entero 010");
                                         }
@@ -137,8 +135,6 @@ instruccionEntradaSalida    : READ_ OB_ ID_ CB_ SC_
 instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccion
                                 {
                                     if ($3.tipo != T_ERROR) {
-                                        yyerror("Variable no declarada en instruccion if 011");
-                                    } else {
                                         if ($3.tipo != T_LOGICO) {
                                             yyerror("Variable de instruccion if no es tipo logico 012");
                                         }
@@ -147,9 +143,7 @@ instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccio
                             ;
 instruccionIteracion        : WHILE_ OB_ expresion CB_ instruccion
                                 {
-                                    if ($3.tipo == T_ERROR) {
-                                        yyerror("Variable no declarada en instruccion while 013");
-                                    } else {
+                                    if ($3.tipo != T_ERROR) {
                                         if ($3.tipo != T_LOGICO) {
                                             yyerror("Variable de instruccion while no es tipo logico 014");
                                         }
