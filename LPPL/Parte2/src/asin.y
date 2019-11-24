@@ -172,7 +172,7 @@ expresion                   : expresionLogica
                                             yyerror("Variable de tipo simple asignada no declarada 015");
                                         } else if (!((simb.tipo == T_LOGICO && $3.tipo == T_LOGICO) || 
                                                      (simb.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
-                                            yyerror("Error de tipos en la asignacion 016");
+                                            yyerror("Los tipos en la asignacion no coinciden 016");
                                         } else {
                                             $$.tipo = simb.tipo;
                                         }
@@ -186,7 +186,7 @@ expresion                   : expresionLogica
                                         if (simb.tipo == T_ERROR) {
                                             yyerror("Variable de array asignada no declarada 017");
                                         } else if (simb.tipo != T_ARRAY) {
-                                            yyerror("Error de tipos en asignacion 018");
+                                            yyerror("Los tipos en la asignacion no coinciden 018");
                                         } else if ($3.tipo != T_ENTERO) {
                                             yyerror("El indice del array no es de tipo entero 019");
                                         } else {
@@ -211,7 +211,7 @@ expresion                   : expresionLogica
                                         } else {
                                             CAMP camp = obtTdR(simb.ref, $3);
                                             if (camp.tipo != $5.tipo) {
-                                                yyerror("Error de tipos en asignacion, el tipo de la expresion no coincide con el del atributo 023");
+                                                yyerror("El tipo de la expresion no coincide con el del atributo 023");
                                             } else {
                                                 $$.tipo = simb.tipo;
                                             }
@@ -245,7 +245,7 @@ expresionIgualdad           : expresionRelacional
                                     if ($1.tipo != T_ERROR && $3.tipo != T_ERROR) {
                                         if (!(($1.tipo == T_LOGICO && $3.tipo == T_LOGICO) || 
                                               ($1.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
-                                            yyerror("Error de tipos en la comparacion de igualdad 025");
+                                            yyerror("Los tipos en la comparacion de igualdad no coinciden 025");
                                         } else {
                                             $$.tipo = T_LOGICO;
                                         }
@@ -262,7 +262,7 @@ expresionRelacional         : expresionAditiva
                                     if ($1.tipo != T_ERROR && $3.tipo != T_ERROR) {
                                         if (!(($1.tipo == T_LOGICO && $3.tipo == T_LOGICO) || 
                                               ($1.tipo == T_ENTERO && $3.tipo == T_ENTERO))) {
-                                            yyerror("Error de tipos en la comparacion 026");
+                                            yyerror("Los tipos en la comparacion no coinciden 026");
                                         } else {
                                             $$.tipo = T_LOGICO;
                                         }
