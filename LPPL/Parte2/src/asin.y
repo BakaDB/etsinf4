@@ -49,7 +49,7 @@ sentencia                   : declaracion
                             ;
 declaracion                 : tipoSimple ID_ SC_
                                 {
-                                    if(!insTdS($2, $1, dvar, -1)) {
+                                    if (!insTdS($2, $1, dvar, -1)) {
                                         yyerror("Declarion de tipo simple con identificador repetido 001");
                                     } else {
                                         dvar += TALLA_TIPO_SIMPLE;
@@ -57,10 +57,14 @@ declaracion                 : tipoSimple ID_ SC_
                                 }
                             | tipoSimple ID_ ASIG_ constante SC_
                                 {
-                                    if(!insTdS($2, $1, dvar, -1)) {
-                                        yyerror("Declaracion y asignacion de tipo simple con identificador repetido 002");
+                                    if ($1 != $4.tipo) {
+                                            yyerror("Los tipos del elemento declarado y asignado no coninciden 001.5");
                                     } else {
-                                        dvar += TALLA_TIPO_SIMPLE;
+                                        if (!insTdS($2, $1, dvar, -1)) {
+                                            yyerror("Declaracion y asignacion de tipo simple con identificador repetido 002");
+                                        } else {
+                                            dvar += TALLA_TIPO_SIMPLE;
+                                        }
                                     }
                                 }
                             | tipoSimple ID_ OSB_ CTE_ CSB_ SC_
@@ -69,12 +73,13 @@ declaracion                 : tipoSimple ID_ SC_
                                     if ($4 < 1) {
                                         yyerror("Declaracion de array con talla invalida 003");
                                         numelem = 0;
-                                    }
-                                    int ref = insTdA($1, numelem);
-                                    if (!insTdS($2, T_ARRAY, dvar, ref)) {
-                                        yyerror("Declaracion de tipo array con identificador repetido 004");
                                     } else {
-                                        dvar += numelem * TALLA_TIPO_SIMPLE;
+                                        int ref = insTdA($1, numelem);
+                                        if (!insTdS($2, T_ARRAY, dvar, ref)) {
+                                            yyerror("Declaracion de tipo array con identificador repetido 004");
+                                        } else {
+                                            dvar += numelem * TALLA_TIPO_SIMPLE;
+                                        }
                                     }
                                 }
                             | STRUCT_ OCB_ listaCampos CCB_ ID_ SC_
