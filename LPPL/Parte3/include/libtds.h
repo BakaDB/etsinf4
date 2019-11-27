@@ -1,9 +1,4 @@
 /*****************************************************************************/
-/**  Definiciones de constantes y estructuras usadas en la libreria, junto  **/
-/**  con los perfiles de las funciones de manipulacion de la TDS.           **/
-/**                     Jose Miguel Benedi, 2019-2020 <jbenedi@dsic.upv.es> **/
-/*****************************************************************************/
-/*****************************************************************************/
 #ifndef _LIBTDS_H
 #define _LIBTDS_H
 
@@ -51,13 +46,13 @@ int insTdR(int refe, char *nom, int tipo, int desp) ;
    de un determinado campo: nombre de campo, "nom"; tipo de campo, "tipo"; y 
    desplazamiento relativo del campo en el registro, "desp". Si "ref = -1" 
    entonces crea una nueva nueva entrada en la Tabla de Registros con este
-   campo y devuelve su referencia. Comprueba además que el nombre del campo 
+   campo y devuelve su referencia. Comprueba ademï¿½s que el nombre del campo 
    no este repetido en el registro, devolviendo "-1" en ese caso.            */
 
 SIMB obtTdS(char *nom) ;
 /* Obtiene toda la informacion asociada con un objeto de nombre, "nom", y la
    devuelve en una estructura de tipo "SIMB" (ver "libtds.h"). Si el objeto 
-   no está declarado, devuelve "T_ERROR" en el campo "tipo".                 */
+   no estï¿½ declarado, devuelve "T_ERROR" en el campo "tipo".                 */
 
 DIM obtTdA(int ref) ;
 /* Devuelve toda la informacion asociada con un array referenciado por "ref" 

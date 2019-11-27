@@ -1,9 +1,4 @@
 /*****************************************************************************/
-/**  Definiciones de constantes y estructuras usadas en la libreria, junto  **/
-/**  con los perfiles de las funciones de ayuda para la GCI.                **/
-/**                     Jose Miguel Benedi, 2019-2020 <jbenedi@dsic.upv.es> **/
-/*****************************************************************************/
-/*****************************************************************************/
 #ifndef _LIBGCI_H
 #define _LIBGCI_H
 
@@ -75,7 +70,7 @@ void emite (int cop, TIPO_ARG arg1, TIPO_ARG arg2, TIPO_ARG res);
 int creaVarTemp ();
 /*  Crea una variable temporal de tipo simple (TALLA_TIPO_SIMPLE = 1), en el 
     segmento de variables (indicado por "dvar") y devuelve su desplazamiento 
-    relativo. A continuacón, incrementa "dvar".                              */
+    relativo. A continuacï¿½n, incrementa "dvar".                              */
 
 void volcarCodigo(char *nom) ;
 /* Vuelca (en modo texto) el codigo generado en un fichero cuyo nombre es el 
