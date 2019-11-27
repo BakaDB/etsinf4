@@ -31,7 +31,8 @@
 %token<cent> CTE_
 
 %type<cent> tipoSimple
-%type<cent> operadorUnario
+%type<cent> operadorAsignacion operadorLogico operadorIgualdad operadorRelacional
+%type<cent> operadorAditivo operadorMultiplicativo operadorUnario operadorIncremento
 
 %type<exp> constante expresion expresionLogica expresionIgualdad expresionRelacional 
 %type<exp> expresionAditiva expresionMultiplicativa expresionUnaria expresionSufija
