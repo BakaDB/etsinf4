@@ -6,6 +6,7 @@
 #include <string.h>
 #include "header.h"
 #include "libtds.h"
+#include "libgci.h"
 %}
 
 %union {
@@ -235,11 +236,11 @@ expresionLogica             : expresionIgualdad
                                     }
 
                                     $$.pos = crearVarTemp();
-                                    if (operadorLogico == AND) {
+                                    if ($2 == AND) {
                                         emite(EMULT, crArgPos($1.pos), crArgPos($3.pos), crArgPos($$.pos));
-                                    } else if (operadorLogico == OR) {
+                                    } else if ($2 == OR) {
                                         emite(ESUM, crArgPos($1.pos), crArgPos($3.pos), crArgPos($$.pos));
-                                        emite(EMENEQ, crArgPos($1.pos), crArgEnt(1), crArgEtq(si + 2));
+                                        emite(EMENEQ, crArgPos($$.pos), crArgEnt(1), crArgEtq(si + 2));
                                         emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.pos));
                                     }
                                 }
@@ -446,8 +447,10 @@ expresionSufija             : OB_ expresion CB_
                                             }
                                         }
                                     }
+
+                                    /*ERRORCITOS*/
                                     
-                                    int pos = $1.pos + $3.pos;
+                                    int pos = simb.desp + camp.ref;
                                     $$.pos = crearVarTemp();
                                     emite(EASIG, crArgPos(pos), crArgNul(), crArgPos($$.pos));
                                 }
