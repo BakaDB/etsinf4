@@ -233,11 +233,20 @@ expresionLogica             : expresionIgualdad
                                             $$.tipo = T_LOGICO;
                                         }
                                     }
+
+                                    $$.pos = crearVarTemp();
+                                    if (operadorLogico == AND) {
+                                        emite(EMULT, crArgPos($1.pos), crArgPos($3.pos), crArgPos($$.pos));
+                                    } else if (operadorLogico == OR) {
+                                        emite(ESUM, crArgPos($1.pos), crArgPos($3.pos), crArgPos($$.pos));
+                                        emite(EMENEQ, crArgPos($1.pos), crArgEnt(1), crArgEtq(si + 2));
+                                        emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.pos));
+                                    }
                                 }
                             ;
 expresionIgualdad           : expresionRelacional
                                 {
-                                    $$.tipo = $1.tipo;
+                                    $$ = $1;
                                 }
                             | expresionIgualdad operadorIgualdad expresionRelacional
                                 {
@@ -249,12 +258,17 @@ expresionIgualdad           : expresionRelacional
                                         } else {
                                             $$.tipo = T_LOGICO;
                                         }
-                                    }                                    
+                                    }
+                                    
+                                    $$.pos = crearVarTemp();
+                                    emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.pos));
+                                    emite($2, crArgPos($1.pos), crArgPos($3.pos), crArgEtq(si + 2));
+                                    emite(EASIG, crArgEnt(0), crArgNul(), crArgPos($$.pos));
                                 }
                             ;                            
 expresionRelacional         : expresionAditiva
                                 {
-                                    $$.tipo = $1.tipo;
+                                    $$ = $1;
                                 }
                             | expresionRelacional operadorRelacional expresionAditiva
                                 {
@@ -266,7 +280,12 @@ expresionRelacional         : expresionAditiva
                                         } else {
                                             $$.tipo = T_LOGICO;
                                         }
-                                    }                                    
+                                    }
+
+                                    $$.pos = crearVarTemp();
+                                    emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.pos));
+                                    emite($2, crArgPos($1.pos), crArgPos($3.pos), crArgEtq(si + 2));
+                                    emite(EASIG, crArgEnt(0), crArgNul(), crArgPos($$.pos));
                                 }
                             ;
 expresionAditiva            : expresionMultiplicativa
@@ -354,7 +373,7 @@ expresionUnaria             : expresionSufija
                             ;
 expresionSufija             : OB_ expresion CB_
                                 {
-                                    $$.tipo = $2.tipo;
+                                    $$ = $2;
                                 } 
                             | ID_ operadorIncremento
                                 {
@@ -367,6 +386,10 @@ expresionSufija             : OB_ expresion CB_
                                             $$.tipo = T_ENTERO;
                                         }
                                     }
+
+                                    $$.pos = crearVarTemp();
+                                    emite(EASIG, crArgPos(simb.desp), crArgNul(), crArgPos($$.pos));                                    
+                                    emite($2, crArgPos(simb.desp), crArgEnt(1), crArgPos(simb.desp));
                                 }
                             | ID_ OSB_ expresion CSB_
                                 {
@@ -388,6 +411,9 @@ expresionSufija             : OB_ expresion CB_
                                             }
                                         }
                                     }
+
+                                    $$.pos = crearVarTemp();
+                                    emite(EAV, crArgPos(simb.desp), crArgPos($3.pos), crArgPos($$.pos));
                                 }
                             | ID_
                                 {
@@ -398,6 +424,9 @@ expresionSufija             : OB_ expresion CB_
                                     } else {
                                         $$.tipo = simb.tipo;
                                     }
+
+                                    $$.pos = crearVarTemp();
+                                    emite(EASIG, crArgPos(simb.desp), crArgNul(), crArgPos($$.pos));
                                 }
                             | ID_ DOT_ ID_ 
                                 {
@@ -417,8 +446,17 @@ expresionSufija             : OB_ expresion CB_
                                             }
                                         }
                                     }
+                                    
+                                    int pos = $1.pos + $3.pos;
+                                    $$.pos = crearVarTemp();
+                                    emite(EASIG, crArgPos(pos), crArgNul(), crArgPos($$.pos));
                                 }
-                            | constante { $$.tipo = $1.tipo; }
+                            | constante 
+                                {
+                                    $$.tipo = $1.tipo;
+                                    $$.pos = crearVarTemp();
+                                    emite(EASIG, crArgPos($1.pos), crArgNul(), crArgPos($$.pos));
+                                }
                             ;
 constante                   : CTE_          { $$.tipo = T_ENTERO; }
                             | TRUE_         { $$.tipo = T_LOGICO; }
