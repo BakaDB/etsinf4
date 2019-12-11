@@ -129,6 +129,8 @@ instruccionEntradaSalida    : READ_ OB_ ID_ CB_ SC_
                                             yyerror("Variable de instruccion read no es tipo entero 008");
                                         }
                                     }
+
+                                    emite(EREAD, crArgNul(), crArgNul(), crArgPos(simb.desp));
                                 }
                             | PRINT_ OB_ expresion CB_ SC_
                                 {
@@ -137,6 +139,8 @@ instruccionEntradaSalida    : READ_ OB_ ID_ CB_ SC_
                                             yyerror("Variable de instruccion print no es tipo entero 010");
                                         }
                                     }
+
+                                    emite(EWRITE, crArgNul(), crArgNul(), crArgPos($3.pos));
                                 }
                             ;
 instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccion
@@ -147,6 +151,7 @@ instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccio
                                         }
                                     }
 
+                                    /* REVISAR EN EJECUCION*/
                                     /*
                                     $<aux2>2.ini
                                     */
