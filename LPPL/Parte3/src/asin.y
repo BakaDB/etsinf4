@@ -146,6 +146,10 @@ instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccio
                                             yyerror("Variable de instruccion if no es tipo logico 012");
                                         }
                                     }
+
+                                    /*
+                                    $<aux2>2.ini
+                                    */
                                 }
                             ;
 instruccionIteracion        : WHILE_ OB_ expresion CB_ instruccion
@@ -162,7 +166,7 @@ instruccionExpresion        : expresion SC_
                             ;
 expresion                   : expresionLogica
                                 {
-                                    $$.tipo = $1.tipo;
+                                    $$ = $1;
                                 }
                             | ID_ operadorAsignacion expresion
                                 {
@@ -178,6 +182,10 @@ expresion                   : expresionLogica
                                             $$.tipo = simb.tipo;
                                         }
                                     }
+
+                                    $$.pos = crearVarTemp();
+                                    emite(EASIG, crArgPos($3.pos), crArgNul(), crArgPos($$.pos));
+                                    emite(EASIG, crArgPos($3.pos), crArgNul(), crArgPos(simb.desp));
                                 }
                             | ID_ OSB_ expresion CSB_ operadorAsignacion expresion
                                 {
@@ -199,6 +207,10 @@ expresion                   : expresionLogica
                                             }
                                         }
                                     }
+
+                                    $$.pos = crearVarTemp();
+                                    emite(EASIG, crArgPos($6.pos), crArgNul(), crArgPos($$.pos));
+                                    emite(EVA, crArgPos(simb.desp), crArgPos($3.pos), crArgPos($6.pos));
                                 }
                             | ID_ DOT_ ID_ operadorAsignacion expresion
                                 {
@@ -218,6 +230,11 @@ expresion                   : expresionLogica
                                             }
                                         }
                                     }
+
+                                    $$.pos = crearVarTemp();
+                                    int pos = simb.desp + camp.desp;
+                                    emite(EASIG, crArgPos($5.pos), crArgNul(), crArgPos($$.pos));
+                                    emite(EASIG, crArgPos($5.pos), crArgNul(), crArgPos(pos));
                                 }
                             ;
 expresionLogica             : expresionIgualdad
@@ -447,9 +464,8 @@ expresionSufija             : OB_ expresion CB_
                                             }
                                         }
                                     }
-
-                                    /*ERRORCITOS*/
                                     
+                                    /* REVISAR EN EJECUCION*/
                                     int pos = simb.desp + camp.ref;
                                     $$.pos = crearVarTemp();
                                     emite(EASIG, crArgPos(pos), crArgNul(), crArgPos($$.pos));
