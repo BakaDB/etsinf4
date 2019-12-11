@@ -68,6 +68,9 @@ declaracion                 : tipoSimple ID_ SC_
                                             dvar += TALLA_TIPO_SIMPLE;
                                         }
                                     }
+
+                                    SIMB simb = obtTdS($2);
+                                    emite(ESASIG, crArgPos($4.pos), crArgNul(), crArgPos(simb.desp)));
                                 }
                             | tipoSimple ID_ OSB_ CTE_ CSB_ SC_
                                 {
@@ -188,9 +191,14 @@ expresion                   : expresionLogica
                                         }
                                     }
 
-                                    $$.pos = crearVarTemp();
-                                    emite(EASIG, crArgPos($3.pos), crArgNul(), crArgPos($$.pos));
-                                    emite(EASIG, crArgPos($3.pos), crArgNul(), crArgPos(simb.desp));
+                                    $$.pos = creaVarTemp();
+                                    if ($2 != EASIG) {
+                                        emite($2, crArgPos(simb.desp), crArgPos($3.pos), crArgPos($$.pos)
+                                        emite($2, crArgPos(simb.desp), crArgPos($3.pos), crArgPos(simb.desp));
+                                    } else {
+                                        emite(EASIG, crArgPos($3.pos), crArgNul(), crArgPos($$.pos));
+                                        emite(EASIG, crArgPos($3.pos), crArgNul(), crArgPos(simb.desp));
+                                    }
                                 }
                             | ID_ OSB_ expresion CSB_ operadorAsignacion expresion
                                 {
@@ -213,7 +221,7 @@ expresion                   : expresionLogica
                                         }
                                     }
 
-                                    $$.pos = crearVarTemp();
+                                    $$.pos = creaVarTemp();
                                     emite(EASIG, crArgPos($6.pos), crArgNul(), crArgPos($$.pos));
                                     emite(EVA, crArgPos(simb.desp), crArgPos($3.pos), crArgPos($6.pos));
                                 }
@@ -221,13 +229,14 @@ expresion                   : expresionLogica
                                 {
                                     $$.tipo = T_ERROR;
                                     SIMB simb = obtTdS($1);
+                                    CAMP camp;
                                     if ($5.tipo != T_ERROR) {
                                         if (simb.tipo == T_ERROR) {
                                             yyerror("Variable de tipo struct asignada no declarada 021");
                                         } else if (simb.tipo != T_RECORD) {
                                             yyerror("La variable no es de tipo struct 022");
                                         } else {
-                                            CAMP camp = obtTdR(simb.ref, $3);
+                                            camp = obtTdR(simb.ref, $3);
                                             if (camp.tipo != $5.tipo) {
                                                 yyerror("El tipo de la expresion no coincide con el del atributo 023");
                                             } else {
@@ -236,7 +245,7 @@ expresion                   : expresionLogica
                                         }
                                     }
 
-                                    $$.pos = crearVarTemp();
+                                    $$.pos = creaVarTemp();
                                     int pos = simb.desp + camp.desp;
                                     emite(EASIG, crArgPos($5.pos), crArgNul(), crArgPos($$.pos));
                                     emite(EASIG, crArgPos($5.pos), crArgNul(), crArgPos(pos));
@@ -257,7 +266,7 @@ expresionLogica             : expresionIgualdad
                                         }
                                     }
 
-                                    $$.pos = crearVarTemp();
+                                    $$.pos = creaVarTemp();
                                     if ($2 == AND) {
                                         emite(EMULT, crArgPos($1.pos), crArgPos($3.pos), crArgPos($$.pos));
                                     } else if ($2 == OR) {
@@ -283,7 +292,7 @@ expresionIgualdad           : expresionRelacional
                                         }
                                     }
                                     
-                                    $$.pos = crearVarTemp();
+                                    $$.pos = creaVarTemp();
                                     emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.pos));
                                     emite($2, crArgPos($1.pos), crArgPos($3.pos), crArgEtq(si + 2));
                                     emite(EASIG, crArgEnt(0), crArgNul(), crArgPos($$.pos));
@@ -305,7 +314,7 @@ expresionRelacional         : expresionAditiva
                                         }
                                     }
 
-                                    $$.pos = crearVarTemp();
+                                    $$.pos = creaVarTemp();
                                     emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.pos));
                                     emite($2, crArgPos($1.pos), crArgPos($3.pos), crArgEtq(si + 2));
                                     emite(EASIG, crArgEnt(0), crArgNul(), crArgPos($$.pos));
@@ -326,7 +335,7 @@ expresionAditiva            : expresionMultiplicativa
                                         }  
                                     }
 
-                                    $$.pos = crearVarTemp();
+                                    $$.pos = creaVarTemp();
                                     emite($2, crArgPos($1.pos), crArgPos($3.pos), crArgPos($$.pos));
                                 }
                             ;
@@ -345,7 +354,7 @@ expresionMultiplicativa     : expresionUnaria
                                         }
                                     }
 
-                                    $$.pos = crearVarTemp();
+                                    $$.pos = creaVarTemp();
                                     emite($2, crArgPos($1.pos), crArgPos($3.pos), crArgPos($$.pos));
                                 }
                             ;
@@ -370,7 +379,7 @@ expresionUnaria             : expresionSufija
                                         }
                                     }
 
-                                    $$.pos = crearVarTemp();
+                                    $$.pos = creaVarTemp();
                                     if ($1 == NOT) {
                                         emite(EDIF, crArgEnt(1), crArgPos($2.pos), crArgPos($$.pos));
                                     } else {
@@ -389,7 +398,7 @@ expresionUnaria             : expresionSufija
                                         }
                                     }
 
-                                    $$.pos = crearVarTemp();
+                                    $$.pos = creaVarTemp();
                                     emite($1, crArgPos(simb.desp), crArgEnt(1), crArgPos(simb.desp));
                                     emite(EASIG, crArgPos(simb.desp), crArgNul(), crArgPos($$.pos));
                                 }
@@ -410,7 +419,7 @@ expresionSufija             : OB_ expresion CB_
                                         }
                                     }
 
-                                    $$.pos = crearVarTemp();
+                                    $$.pos = creaVarTemp();
                                     emite(EASIG, crArgPos(simb.desp), crArgNul(), crArgPos($$.pos));                                    
                                     emite($2, crArgPos(simb.desp), crArgEnt(1), crArgPos(simb.desp));
                                 }
@@ -435,7 +444,7 @@ expresionSufija             : OB_ expresion CB_
                                         }
                                     }
 
-                                    $$.pos = crearVarTemp();
+                                    $$.pos = creaVarTemp();
                                     emite(EAV, crArgPos(simb.desp), crArgPos($3.pos), crArgPos($$.pos));
                                 }
                             | ID_
@@ -448,20 +457,21 @@ expresionSufija             : OB_ expresion CB_
                                         $$.tipo = simb.tipo;
                                     }
 
-                                    $$.pos = crearVarTemp();
+                                    $$.pos = creaVarTemp();
                                     emite(EASIG, crArgPos(simb.desp), crArgNul(), crArgPos($$.pos));
                                 }
                             | ID_ DOT_ ID_ 
                                 {
                                     $$.tipo = T_ERROR;
                                     SIMB simb = obtTdS($1);
+                                    CAMP camp;
                                     if (simb.tipo == T_ERROR) {
                                         yyerror("Variable no declarada 037");
                                     } else {
                                         if (!(simb.tipo == T_RECORD)) {
                                             yyerror("El identificador no es de tipo struct 038");
                                         } else {
-                                            CAMP camp = obtTdR(simb.ref, $3);
+                                            camp = obtTdR(simb.ref, $3);
                                             if (camp.tipo == T_ERROR) {
                                                 yyerror("Atributo de variable tipo struct no declarado 039");
                                             } else {
@@ -470,15 +480,14 @@ expresionSufija             : OB_ expresion CB_
                                         }
                                     }
                                     
-                                    /* REVISAR EN EJECUCION*/
-                                    int pos = simb.desp + camp.ref;
-                                    $$.pos = crearVarTemp();
+                                    int pos = simb.desp + camp.desp;
+                                    $$.pos = creaVarTemp();
                                     emite(EASIG, crArgPos(pos), crArgNul(), crArgPos($$.pos));
                                 }
                             | constante 
                                 {
                                     $$.tipo = $1.tipo;
-                                    $$.pos = crearVarTemp();
+                                    $$.pos = creaVarTemp();
                                     emite(EASIG, crArgPos($1.pos), crArgNul(), crArgPos($$.pos));
                                 }
                             ;
