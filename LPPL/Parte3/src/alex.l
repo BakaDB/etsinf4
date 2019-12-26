@@ -23,18 +23,21 @@
 -----------------------------------------------------------------------------*/
 %option yylineno  
 
-delimitador     [ \t\n]+
+delimitador     [ \t]+
 comentario      \/\/.*\n
 letra           [A-Za-z]
 digito          [0-9]
 entero          {digito}+
 constante       {entero}|{entero}\.|{entero}\.{entero}|\.{entero}
 identificador   {letra}({letra}|{digito}|\_)*
-
+nuevaLinea      \n
 
 %%
+
+<<EOF>>         { if (verbosidad) {ECHO; printf("\n"); retornar(0);}}
+{nuevaLinea}    { if (verbosidad) {ECHO; printf("%3d.- ", yylineno);}}
 {delimitador}   { if (verbosidad) ECHO; }
-{comentario}    { if (verbosidad) ECHO; }
+{comentario}    { if (verbosidad) {ECHO; printf("%3d.- ", yylineno);}}
 
 "struct"        { retornar (STRUCT_); }
 "int"           { retornar (INT_); }
