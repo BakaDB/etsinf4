@@ -70,7 +70,7 @@ declaracion                 : tipoSimple ID_ SC_
                                     }
 
                                     SIMB simb = obtTdS($2);
-                                    emite(ESASIG, crArgPos($4.pos), crArgNul(), crArgPos(simb.desp)));
+                                    emite(EASIG, crArgPos($4.pos), crArgNul(), crArgPos(simb.desp));
                                 }
                             | tipoSimple ID_ OSB_ CTE_ CSB_ SC_
                                 {
@@ -146,7 +146,7 @@ instruccionEntradaSalida    : READ_ OB_ ID_ CB_ SC_
                                     emite(EWRITE, crArgNul(), crArgNul(), crArgPos($3.pos));
                                 }
                             ;
-instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccion
+instruccionSeleccion        : IF_ OB_ expresion CB_ 
                                 {
                                     if ($3.tipo != T_ERROR) {
                                         if ($3.tipo != T_LOGICO) {
@@ -154,19 +154,39 @@ instruccionSeleccion        : IF_ OB_ expresion CB_ instruccion ELSE_ instruccio
                                         }
                                     }
 
-                                    /* REVISAR EN EJECUCION*/
-                                    /*
-                                    $<aux2>2.ini
-                                    */
+                                    $<cent>$ = crearLans(si);
+                                    emite(EIGUAL, crArgPos($3.pos), crArgEnt(0), crArgEtq(-1));
+                                }
+                              instruccion
+                                {
+                                    $<cent>$ = crearLans(si);
+                                    emite(GOTOS, crArgNul(), crArgNul(), crArgEtq(-1));
+                                    completaLans($<cent>5, crArgEnt(si));
+                                }
+                              ELSE_ instruccion
+                                {
+                                    completaLans($<cent>7, crArgEnt(si));
                                 }
                             ;
-instruccionIteracion        : WHILE_ OB_ expresion CB_ instruccion
+instruccionIteracion        : WHILE_
                                 {
-                                    if ($3.tipo != T_ERROR) {
-                                        if ($3.tipo != T_LOGICO) {
+                                    $<cent>$ = si;
+                                }
+                              OB_ expresion CB_
+                                {
+                                    if ($4.tipo != T_ERROR) {
+                                        if ($4.tipo != T_LOGICO) {
                                             yyerror("Variable de instruccion while no es tipo logico 014");
                                         }
                                     }
+
+                                    $<cent>$ = crearLans(si);
+                                    emite(EIGUAL, crArgPos($4.pos), crArgEnt(0), crArgEtq(-1));
+                                }
+                              instruccion
+                                {
+                                    emite(GOTOS, crArgNul(), crArgNul(), crArgEtq($<cent>2));
+                                    completaLans($<cent>6, crArgEtq(si));
                                 }
                             ;
 instruccionExpresion        : expresion SC_
@@ -193,7 +213,7 @@ expresion                   : expresionLogica
 
                                     $$.pos = creaVarTemp();
                                     if ($2 != EASIG) {
-                                        emite($2, crArgPos(simb.desp), crArgPos($3.pos), crArgPos($$.pos)
+                                        emite($2, crArgPos(simb.desp), crArgPos($3.pos), crArgPos($$.pos));
                                         emite($2, crArgPos(simb.desp), crArgPos($3.pos), crArgPos(simb.desp));
                                     } else {
                                         emite(EASIG, crArgPos($3.pos), crArgNul(), crArgPos($$.pos));
