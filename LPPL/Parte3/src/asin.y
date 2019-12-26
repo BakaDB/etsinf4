@@ -154,12 +154,12 @@ instruccionSeleccion        : IF_ OB_ expresion CB_
                                         }
                                     }
 
-                                    $<cent>$ = crearLans(si);
+                                    $<cent>$ = creaLans(si);
                                     emite(EIGUAL, crArgPos($3.pos), crArgEnt(0), crArgEtq(-1));
                                 }
                               instruccion
                                 {
-                                    $<cent>$ = crearLans(si);
+                                    $<cent>$ = creaLans(si);
                                     emite(GOTOS, crArgNul(), crArgNul(), crArgEtq(-1));
                                     completaLans($<cent>5, crArgEnt(si));
                                 }
@@ -180,7 +180,7 @@ instruccionIteracion        : WHILE_
                                         }
                                     }
 
-                                    $<cent>$ = crearLans(si);
+                                    $<cent>$ = creaLans(si);
                                     emite(EIGUAL, crArgPos($4.pos), crArgEnt(0), crArgEtq(-1));
                                 }
                               instruccion
