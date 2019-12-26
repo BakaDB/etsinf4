@@ -41,7 +41,7 @@
 %type<lc> listaCampos
 
 %%
-programa                    : { dvar = 0; si = 0; } OCB_ secuenciaSentencias CCB_ { if (verTDS) verTdS(); }
+programa                    : { dvar = 0; si = 0; } OCB_ secuenciaSentencias CCB_ { if (verTDS) verTdS(); emit(FIN, crArgNul(), crArgNul(), crArgNul())}
                             ;
 secuenciaSentencias         : sentencia 
                             | secuenciaSentencias sentencia
