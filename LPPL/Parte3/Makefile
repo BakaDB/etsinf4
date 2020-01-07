@@ -12,13 +12,13 @@ CLIB = -lfl -ltds -lgci
 OBJS = ./alex.o  ./asin.o ./principal.o 
 #
 cmc:	$(OBJS)  $(LIBDIR)/libtds.a  $(LIBDIR)/libgci.a
-	gcc-4.8 $(OBJS) -I$(INCDIR) -L$(LIBDIR) $(COPT) $(CLIB) -o cmc
+	gcc $(OBJS) -I$(INCDIR) -L$(LIBDIR) $(COPT) $(CLIB) -o cmc
 principal.o: $(SRCDIR)/principal.c
-	gcc-4.8  -I$(INCDIR) $(COPT) -c $(SRCDIR)/principal.c
+	gcc  -I$(INCDIR) $(COPT) -c $(SRCDIR)/principal.c
 asin.o:	asin.c
-	gcc-4.8  -I$(INCDIR) $(COPT) -c asin.c
+	gcc  -I$(INCDIR) $(COPT) -c asin.c
 alex.o:	alex.c asin.c
-	gcc-4.8  -I$(INCDIR) $(COPT) -c alex.c
+	gcc  -I$(INCDIR) $(COPT) -c alex.c
 asin.c:	$(SRCDIR)/asin.y
 	bison -oasin.c  -d $(SRCDIR)/asin.y
 	mv ./asin.h ./include	
