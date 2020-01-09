@@ -76,7 +76,7 @@ declaracion                 : tipoSimple ID_ SC_
                                             dvar += TALLA_TIPO_SIMPLE;
                                         }
                                     }
-
+                                    
                                     SIMB simb = obtTdS($2);
                                     emite(EASIG, crArgPos($4.pos), crArgNul(), crArgPos(simb.desp));
                                 }
@@ -512,16 +512,26 @@ expresionSufija             : OB_ expresion CB_
                                     $$.pos = creaVarTemp();
                                     emite(EASIG, crArgPos(pos), crArgNul(), crArgPos($$.pos));
                                 }
-                            | constante 
-                                {
-                                    $$.tipo = $1.tipo;
-                                    $$.pos = creaVarTemp();
-                                    emite(EASIG, crArgPos($1.pos), crArgNul(), crArgPos($$.pos));
-                                }
+                            | constante { $$ = $1; }
                             ;
-constante                   : CTE_          { $$.tipo = T_ENTERO; }
-                            | TRUE_         { $$.tipo = T_LOGICO; }
-                            | FALSE_        { $$.tipo = T_LOGICO; }
+constante                   : CTE_          
+                                {
+                                    $$.tipo = T_ENTERO;
+                                    $$.pos = creaVarTemp();
+                                    emite(EASIG, crArgEnt($1), crArgNul(), crArgPos($$.pos));
+                                }
+                            | TRUE_
+                                { 
+                                    $$.tipo = T_LOGICO;
+                                    $$.pos = creaVarTemp();
+                                    emite(EASIG, crArgEnt(1), crArgNul(), crArgPos($$.pos));
+                                }
+                            | FALSE_        
+                                {
+                                    $$.tipo = T_LOGICO; 
+                                    $$.pos = creaVarTemp();
+                                    emite(EASIG, crArgEnt(0), crArgNul(), crArgPos($$.pos));
+                                }
                             ;
 operadorAsignacion          : ASIG_         { $$ = EASIG; }
                             | MASASIG_      { $$ = ESUM; }
