@@ -34,7 +34,6 @@ nuevaLinea      \n
 
 %%
 
-<<EOF>>         { if (verbosidad) {ECHO; printf("\n"); retornar(0);} }
 {nuevaLinea}    { if (verbosidad) {ECHO; printf("%3d.- ", yylineno);} }
 {delimitador}   { if (verbosidad) ECHO; }
 {comentario}    { if (verbosidad) {ECHO; printf("%3d.- ", yylineno);} }
